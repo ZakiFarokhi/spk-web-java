@@ -23,20 +23,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-        System.out.println(user.getUsername());
-        System.out.println(user.getPassword());
-        System.out.println(user.getRole().getId());
 
         Set<GrantedAuthority> authorities = Collections.singleton(
                 new SimpleGrantedAuthority(user.getRole().getName())
         );
-
+        String roleName = user.getRole().getName().toUpperCase();
+        System.out.println(roleName);
+        System.out.println(user.getPassword());
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.isEnabled(),
                 true, true, true,
-                authorities
+                Collections.singleton(new SimpleGrantedAuthority(roleName))
         );
     }
 }
