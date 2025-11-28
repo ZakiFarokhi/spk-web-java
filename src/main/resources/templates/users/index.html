@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<th:block layout:fragment="content">
+
+    <div class="container-fluid">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#userModal"
+                        onclick="openUserModal(null)">Add User</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Users</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.id}">1</td>
+                        <td th:text="${u.username}">username</td>
+                        <td th:text="${u.email}">email@example.com</td>
+                        <td th:text="${u.role != null ? u.role.name : ''}">Role</td>
+                        <td th:text="${u.enabled} ? 'Active' : 'Inactive'">Status</td>
+<!--                        <td>-->
+<!--                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#userModal"-->
+<!--                                    th:onclick="'openUserModal(' + ${u} + ')'">Edit</button>-->
+<!--                            <a th:href="@{/users/delete/{id}(id=${u.id})}" class="btn btn-danger btn-sm"-->
+<!--                               onclick="return confirm('Are you sure?')">Delete</a>-->
+<!--                        </td>-->
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Create/Edit User -->
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="userForm" th:object="${user}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" th:text="${user.id != null ? 'Edit User' : 'Create User'}">Create User</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Username -->
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" th:field="*{username}" class="form-control" required>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" required>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" th:field="*{password}" class="form-control"
+                                   th:placeholder="${user.id != null ? '(leave blank to keep current)' : ''}">
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-group">
+                            <label>Status</label><br>
+                            <input type="checkbox" th:field="*{enabled}"> Active
+                        </div>
+
+                        <!-- Role Radio Buttons -->
+                        <div class="form-group">
+                            <label>Role</label><br>
+                            <div th:each="r : ${roles}" class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{role.id}" th:value="${r.id}"
+                                       th:checked="${user.role != null} ? ${r.id} == ${user.role.id} : false">
+                                <label class="form-check-label" th:text="${r.name}"></label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS to populate modal -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function openUserModal(user) {
+            const form = document.getElementById('userForm');
+            if(user) {
+                form.action = /*[[@{/users/edit/}]]*/ + user.id;
+                form.username.value = user.username;
+                form.email.value = user.email;
+                form.password.value = '';
+                form.enabled.checked = user.enabled;
+                document.querySelectorAll('#userForm input[name="role.id"]').forEach(radio => {
+                    radio.checked = (user.role != null && radio.value == user.role.id);
+                });
+            } else {
+                form.action = /*[[@{/users/create}]]*/;
+                form.reset();
+            }
+        }
+        /*]]>*/
+    </script>
+
+</th:block>
+</html>
