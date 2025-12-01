@@ -2,132 +2,189 @@
 <html layout:decorate="~{shared/layout}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Management</title>
+
+    <style>
+        /* TABEL */
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td, th {
+            vertical-align: middle !important;
+        }
+
+        /* FORM CREATE BAR */
+        .create-bar .form-control {
+            border-radius: 6px;
+        }
+
+        .create-bar button {
+            border-radius: 6px;
+        }
+
+        /* INLINE EDIT */
+        tr.edit-row {
+            background: #fffceb !important;
+        }
+
+        tr.edit-row input,
+        tr.edit-row select {
+            border-radius: 6px;
+        }
+
+        /* CARD STYLE */
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            margin: 10px;
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+</head>
+
+<body>
 
 <th:block layout:fragment="content">
 
-    <div class="container-fluid">
-
-        <div class="row mb-3">
-            <div class="col-12">
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#userModal"
-                        onclick="openUserModal(null)">Add User</button>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">User Management</h3>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Users</h3>
-            </div>
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="u : ${users}">
-                        <td th:text="${u.id}">1</td>
-                        <td th:text="${u.username}">username</td>
-                        <td th:text="${u.email}">email@example.com</td>
-                        <td th:text="${u.role != null ? u.role.name : ''}">Role</td>
-                        <td th:text="${u.enabled} ? 'Active' : 'Inactive'">Status</td>
-<!--                        <td>-->
-<!--                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#userModal"-->
-<!--                                    th:onclick="'openUserModal(' + ${u} + ')'">Edit</button>-->
-<!--                            <a th:href="@{/users/delete/{id}(id=${u.id})}" class="btn btn-danger btn-sm"-->
-<!--                               onclick="return confirm('Are you sure?')">Delete</a>-->
-<!--                        </td>-->
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <div class="card-body">
 
+            <!-- CREATE BAR -->
+            <form th:action="@{/users/create}" method="post" class="mb-4 create-bar">
+                <div class="row g-2">
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="username" placeholder="Username" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="email" placeholder="Email" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <select class="form-control" name="role.id" required>
+                            <option value="">Role</option>
+                            <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Add User
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- TABLE -->
+            <table class="table table-hover table-bordered">
+                <thead class="bg-light">
+                <tr>
+                    <th style="width: 50px">ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Role</th>
+                    <th style="width: 140px">Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="u : ${users}"
+                    th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
+
+                    <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
+
+                        <!-- VIEW MODE -->
+                        <th:block th:if="${!isEdit}">
+                            <td th:text="${u.id}"></td>
+                            <td th:text="${u.username}"></td>
+                            <td th:text="${u.email}"></td>
+                            <td>••••••</td>
+                            <td th:text="${u.role != null ? u.role.name : '-'}"></td>
+
+                            <td class="text-center">
+                                <a th:href="@{'/users?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form th:action="@{'/users/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </th:block>
+
+                        <!-- EDIT MODE -->
+                        <th:block th:if="${isEdit}">
+                            <form th:action="@{'/users/update/' + ${u.id}}" method="post">
+                                <td><strong th:text="${u.id}"></strong></td>
+
+                                <td>
+                                    <input class="form-control" name="username" th:value="${u.username}">
+                                </td>
+
+                                <td>
+                                    <input class="form-control" name="email" th:value="${u.email}">
+                                </td>
+
+                                <td>
+                                    <input class="form-control" name="password" placeholder="(optional)">
+                                </td>
+
+                                <td>
+                                    <select class="form-control" name="role.id">
+                                        <option th:each="r : ${roles}"
+                                                th:value="${r.id}"
+                                                th:selected="${u.role != null and r.id == u.role.id}"
+                                                th:text="${r.name}">
+                                        </option>
+                                    </select>
+                                </td>
+
+                                <td class="text-center">
+                                    <button class="btn btn-success btn-sm me-1">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <a th:href="@{/users}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </td>
+                            </form>
+                        </th:block>
+
+                    </th:block>
+
+                </tr>
+
+                </tbody>
+            </table>
+
+        </div>
     </div>
-
-    <!-- Modal Create/Edit User -->
-    <div class="modal fade" id="userModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form id="userForm" th:object="${user}" method="post">
-                    <div class="modal-header">
-                        <h5 class="modal-title" th:text="${user.id != null ? 'Edit User' : 'Create User'}">Create User</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-
-                        <!-- Username -->
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" th:field="*{username}" class="form-control" required>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" th:field="*{email}" class="form-control" required>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" th:field="*{password}" class="form-control"
-                                   th:placeholder="${user.id != null ? '(leave blank to keep current)' : ''}">
-                        </div>
-
-                        <!-- Status -->
-                        <div class="form-group">
-                            <label>Status</label><br>
-                            <input type="checkbox" th:field="*{enabled}"> Active
-                        </div>
-
-                        <!-- Role Radio Buttons -->
-                        <div class="form-group">
-                            <label>Role</label><br>
-                            <div th:each="r : ${roles}" class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{role.id}" th:value="${r.id}"
-                                       th:checked="${user.role != null} ? ${r.id} == ${user.role.id} : false">
-                                <label class="form-check-label" th:text="${r.name}"></label>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- JS to populate modal -->
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        function openUserModal(user) {
-            const form = document.getElementById('userForm');
-            if(user) {
-                form.action = /*[[@{/users/edit/}]]*/ + user.id;
-                form.username.value = user.username;
-                form.email.value = user.email;
-                form.password.value = '';
-                form.enabled.checked = user.enabled;
-                document.querySelectorAll('#userForm input[name="role.id"]').forEach(radio => {
-                    radio.checked = (user.role != null && radio.value == user.role.id);
-                });
-            } else {
-                form.action = /*[[@{/users/create}]]*/;
-                form.reset();
-            }
-        }
-        /*]]>*/
-    </script>
 
 </th:block>
+
+<!-- panggil layout utama -->
+<th:block th:replace="~{layouts/main :: layout(~{::content})}"></th:block>
+
+</body>
 </html>
