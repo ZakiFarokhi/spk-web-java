@@ -1,7 +1,9 @@
 package com.example.spk.util;
 
+import com.example.spk.entity.Pendidikan;
 import com.example.spk.entity.Role;
 import com.example.spk.entity.User;
+import com.example.spk.repository.PendidikanRepository;
 import com.example.spk.repository.RoleRepository;
 import com.example.spk.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +17,7 @@ import java.util.Optional;
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner init(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner init(RoleRepository roleRepository, UserRepository userRepository, PendidikanRepository pendidikanRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             // ----------------------------
             // 1. Create Roles if not exist
@@ -25,6 +27,13 @@ public class DataInitializer {
 
             Role userRole = roleRepository.findByName("USER")
                     .orElseGet(() -> roleRepository.save(new Role("USER")));
+
+            pendidikanRepository.findByName("SMA/SMK").orElseGet(()-> pendidikanRepository.save(new Pendidikan("SMA/SMK")));
+            pendidikanRepository.findByName("Diploma").orElseGet(()-> pendidikanRepository.save(new Pendidikan("Diploma")));
+            pendidikanRepository.findByName("S1").orElseGet(()-> pendidikanRepository.save(new Pendidikan("S1")));
+            pendidikanRepository.findByName("S2").orElseGet(()-> pendidikanRepository.save(new Pendidikan("S2")));
+            pendidikanRepository.findByName("S3").orElseGet(()-> pendidikanRepository.save(new Pendidikan("S3")));
+
 
             // ----------------------------
             // 2. Create admin user if not exist

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Auditor Management</title>
+
+    <style>
+        /* TABEL */
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td, th {
+            vertical-align: middle !important;
+        }
+
+        /* FORM CREATE BAR */
+        .create-bar .form-control {
+            border-radius: 6px;
+        }
+
+        .create-bar button {
+            border-radius: 6px;
+        }
+
+        /* INLINE EDIT */
+        tr.edit-row {
+            background: #fffceb !important;
+        }
+
+        tr.edit-row input,
+        tr.edit-row select {
+            border-radius: 6px;
+        }
+
+        /* CARD STYLE */
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            margin: 10px;
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<th:block layout:fragment="content">
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Auditor Management</h3>
+        </div>
+
+        <div class="card-body">
+
+            <!-- CREATE BAR -->
+            <form th:action="@{/auditors/create}" method="post" class="mb-4 create-bar">
+                <div class="row g-2">
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="nama" placeholder="Nama" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="nip" placeholder="NIP" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="jabatan" placeholder="Jabatan" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input class="form-control" name="unit_kerja" placeholder="Unit Kerja" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <select class="form-control" name="pendidikan.id" required>
+                            <option value="">Pendidikan</option>
+                            <option th:each="r : ${pendidikan}" th:value="${r.id}" th:text="${r.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Add User
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- TABLE -->
+            <table class="table table-hover table-bordered">
+                <thead class="bg-light">
+                <tr>
+                    <th style="width: 50px">ID</th>
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Jabatan</th>
+                    <th>Unit Kerja</th>
+                    <th>Pendidikan</th>
+                    <th style="width: 140px">Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="u : ${auditors}"
+                    th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
+
+                    <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
+
+                        <!-- VIEW MODE -->
+                        <th:block th:if="${!isEdit}">
+                            <td th:text="${u.id}"></td>
+                            <td th:text="${u.nama}"></td>
+                            <td th:text="${u.nip}"></td>
+                            <td th:text="${u.jabatan}"></td>
+                            <td th:text="${u.unit_kerja}"></td>
+                            <td th:text="${u.pendidikan != null ? u.pendidikan.name : '-'}"></td>
+
+                            <td class="text-center">
+                                <a th:href="@{'/auditors?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form th:action="@{'/auditors/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </th:block>
+
+                        <!-- EDIT MODE -->
+                        <th:block th:if="${isEdit}">
+                            <form th:action="@{'/auditors/update/' + ${u.id}}" method="post">
+                                <td><strong th:text="${u.id}"></strong></td>
+
+                                <td>
+                                    <input class="form-control" name="nama" th:value="${u.nama}">
+                                </td>
+
+                                <td>
+                                    <input type="number" class="form-control" name="nip" th:value="${u.nip}">
+                                </td>
+
+                                <td>
+                                    <input class="form-control" name="jabatan" th:value="${u.jabatan}">
+                                </td>
+
+                                <td>
+                                    <input class="form-control" name="unit_kerja" th:value="${u.unit_kerja}">
+                                </td>
+
+                                <td>
+                                    <select class="form-control" name="pendidikan.id">
+                                        <option th:each="r : ${pendidikan}"
+                                                th:value="${r.id}"
+                                                th:selected="${u.pendidikan != null and r.id == u.pendidikan.id}"
+                                                th:text="${r.name}">
+                                        </option>
+                                    </select>
+                                </td>
+
+                                <td class="text-center">
+                                    <button class="btn btn-success btn-sm me-1">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <a th:href="@{/auditors}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </td>
+                            </form>
+                        </th:block>
+
+                    </th:block>
+
+                </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</th:block>
+
+<!-- panggil layout utama -->
+<th:block th:replace="~{layouts/main :: layout(~{::content})}"></th:block>
+
+</body>
+</html>
