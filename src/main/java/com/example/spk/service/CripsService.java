@@ -32,11 +32,8 @@ public class CripsService {
         return cripsRepository.findById(id);
     }
 
-    public Crips save(Long subCriteriaId, Crips crips) {
-        SubCriteria sc = subCriteriaService.findById(subCriteriaId)
-                .orElseThrow(() -> new RuntimeException("SubCriteria not found"));
+    public Crips save(Crips crips) {
 
-        crips.setSubCriteria(sc);
         return cripsRepository.save(crips);
     }
 

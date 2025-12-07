@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sub Criteria Management</title>
+    <style>
+        /* TABEL */
+        table.table-hover tbody tr:hover {
+        background-color: #f7f7f7;
+        }
+        td, th {
+        vertical-align: middle !important;
+        }
+        /* INLINE EDIT */
+        tr.edit-row {
+        background: #fffceb !important;
+        }
+        /* HIGHLIGHT ROW WHEN EXPANDED */
+        tr.bg-light {
+        background-color: #f8f9fa !important;
+        }
+        /* CARD STYLE */
+        .card {
+        margin: 10px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card-header {
+        margin: 10px;
+        background: #3c8dbc;
+        color: white;
+        border-radius: 12px 12px 0 0 !important;
+        }
+
+        /* Custom Table CSS */
+        .custom-table {
+        display: table;
+        width: 100%; /* Pastikan tabel kustom mengambil lebar penuh */
+        border-collapse: collapse; /* Meniru perilaku tabel */
+        }
+        /* Custom Row CSS */
+        .custom-row {
+        display: table-row;
+        }
+        /* Custom Cell CSS */
+        .custom-cell {
+        display: table-cell;
+        padding: 0.75rem; /* Meniru padding default Bootstrap untuk sel */
+        border: 1px solid #dee2e6; /* Meniru border tabel */
+        vertical-align: middle !important; /* Meniru 'td, th' */
+        }
+        .custom-table .custom-row:hover {
+        background-color: #f7f7f7;
+        }
+        .custom-cell {
+        vertical-align: middle !important;
+        }
+        .custom-row.edit-row {
+        background: #fffceb !important;
+        }
+        .custom-row.bg-light {
+        background-color: #f8f9fa !important;
+        }
+        .custom-row.bg-light .custom-cell {
+        font-weight: bold;
+        border-bottom-width: 2px;
+        }
+    </style>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Sub Criteria Management</h3>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/sub_criterias/create}" method="post" class="mb-4 create-bar">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <select class="form-control" name="criteria.id" required>
+                            <option value="">Criteria</option>
+                            <option th:each="r : ${criterias}" th:value="${r.id}" th:text="${r.name}+' - '+${r.code}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input class="form-control" name="code" placeholder="Kode" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input class="form-control" name="name" placeholder="Nama" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Add Sub Criteria
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <table class="table table-hover table-bordered" id="subcriteria-table">
+                <thead class="bg-light">
+                <tr>
+                    <th style="width: 50px">ID</th>
+                    <th>Kriteria</th>
+                    <th>Kode Sub Kriteria</th>
+                    <th>Sub Kriteria</th>
+                    <th>Crips (Nilai Crips)</th>
+                    <th style="width: 80px">Aksi Crips</th>
+                    <th style="width: 140px">Aksi</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="u : ${sub_criterias}">
+                    <tr th:id="'row-main-' + ${u.id}"
+                        th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
+                        <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
+                            <th:block th:if="${!isEdit}">
+                                <td th:text="${u.id}"></td>
+                                <td th:text="${u.criteria.code} +' - ' + ${u.criteria.name}"></td>
+                                <td th:text="${u.code}"></td>
+                                <td th:text="${u.name}"></td>
+                                <td>
+                                    <span th:text="${#lists.size(u.cripsList)}">0</span> Crips
+                                </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-info btn-sm"
+                                            th:data-target="'#modalCrips'+${u.id}"
+                                            data-toggle="modal">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{'/sub_criterias?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{'/sub_criterias/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </th:block>
+                            <th:block th:if="${isEdit}">
+                                <form th:action="@{'/sub_criterias/update/' + ${u.id}}" method="post">
+                                    <td><strong th:text="${u.id}"></strong></td>
+                                    <td>
+                                        <select class="form-control" name="criteria.id">
+                                            <option th:each="r : ${criterias}"
+                                                    th:value="${r.id}"
+                                                    th:selected="${u.criteria != null and r.id == u.criteria.id}"
+                                                    th:text="${r.name}">
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="code" th:value="${u.code}"></td>
+                                    <td><input class="form-control" name="name" th:value="${u.name}"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-success btn-sm me-1"><i class="fas fa-check"></i></button>
+                                        <a th:href="@{/sub_criterias}" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </td>
+                                </form>
+                            </th:block>
+                        </th:block>
+                    </tr>
+                    <div class="modal fade" th:id="'modalCrips'+${u.id}" id="modalCrips" tabindex="-1" role="dialog" aria-labelledby="modalCrips" aria-hidden="true">
+                        <div class="modal-dialog modal-xl" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form th:action="'/sub_criterias/crips/create'" method="post" class="mb-4 create-bar">
+                                        <div class="row g-2">
+
+                                            <div class="col-md-3">
+                                                <input class="form-control" name="description" placeholder="Deskripsi Crips" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input class="form-control" name="nilai" placeholder="Nilai" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input class="form-control" name="subCriteria.id" th:value="${u.id}" placeholder="Nilai" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <button class="btn btn-primary w-100">
+                                                    <i class="fas fa-user-plus"></i> Add Crips
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div class="custom-table table-sm table-striped mb-0">
+                                        <div class="custom-row bg-light">
+                                            <div class="custom-cell" style="width: 50px;"><b>ID</b></div>
+                                            <div class="custom-cell"><b>Deskripsi Crips</b></div>
+                                            <div class="custom-cell" style="width: 100px;"><b>Nilai (V)</b></div>
+                                            <div class="custom-cell" style="width: 140px;"><b>Aksi</b></div>
+                                        </div>
+                                        <th:block>
+                                            <div th:each="c : ${u.cripsList}" class="custom-row">
+                                                <div class="custom-cell" th:text="${c.id}"></div>
+                                                <div class="custom-cell" th:text="${c.description}">Sangat Baik</div>
+                                                <div class="custom-cell" th:text="${c.nilai}">5</div>
+                                                <div class="custom-cell">
+                                                    <a th:href="@{'/crips?edit=' + ${c.id}}" class="btn btn-warning btn-xs me-1">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </a>
+                                                    <form th:action="@{'/crips/delete/' + ${c.id}}" method="post" style="display:inline;">
+                                                        <button class="btn btn-danger btn-xs">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div th:if="${#lists.isEmpty(u.cripsList)}" class="custom-row">
+                                                <div class="custom-cell text-center text-muted" style="grid-column: 1 / span 4; display: table-cell;">
+                                                    Belum ada Crips yang ditetapkan.
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</th:block>
+<th:block th:replace="~{layouts/main :: layout(~{::content})}"></th:block>
+</body>
+</html>

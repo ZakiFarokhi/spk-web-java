@@ -32,11 +32,7 @@ public class SubCriteriaService {
         return subCriteriaRepository.findById(id);
     }
 
-    public SubCriteria save(Long criteriaId, SubCriteria subCriteria) {
-        Criteria criteria = criteriaService.findById(criteriaId)
-                .orElseThrow(() -> new RuntimeException("Criteria not found"));
-
-        subCriteria.setCriteria(criteria);
+    public SubCriteria save(SubCriteria subCriteria) {
         return subCriteriaRepository.save(subCriteria);
     }
 

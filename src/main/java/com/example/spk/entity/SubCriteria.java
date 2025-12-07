@@ -12,6 +12,9 @@ public class SubCriteria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable=false)
+    private String code;
+
     @Column(nullable = false)
     private String name;
 
@@ -35,6 +38,14 @@ public class SubCriteria {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getName() {

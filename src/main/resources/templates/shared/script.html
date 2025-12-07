@@ -32,3 +32,41 @@
 <script src="/webjars/AdminLTE/3.2.0/dist/js/pages/dashboard.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="/webjars/AdminLTE/3.2.0/dist/js/demo.js"></script>
+<script>
+    /**
+ * subcriteria-toggle.js
+ * Handle the click event for expanding/collapsing sub-criteria crips table
+ * using Event Delegation to ensure it works even if elements are dynamically loaded.
+ */
+
+$(document).ready(function() {
+
+    // Gunakan Delegasi Event pada 'document' untuk menangani elemen dinamis.
+    $(document).on('click', '.toggle-crips', function(e) {
+
+        console.log("loaded");
+        e.preventDefault();
+
+        // Dapatkan ID Sub Criteria dari tombol yang diklik
+        var subId = $(this).data('sub-id');
+        // Targetkan baris nested
+        var $nestedRow = $('#crips-nested-' + subId);
+        // Targetkan baris utama
+        var $mainRow = $('#row-main-' + subId);
+        // Targetkan ikon
+        var $icon = $(this).find('i');
+
+        // TOGGLE DISPLAY
+        $nestedRow.toggle(300);
+
+        // UBAH ICON DAN HIGHLIGHT
+        if ($nestedRow.is(':visible')) {
+            $icon.removeClass('fa-plus').addClass('fa-minus');
+            $mainRow.addClass('bg-light');
+        } else {
+            $icon.removeClass('fa-minus').addClass('fa-plus');
+            $mainRow.removeClass('bg-light');
+        }
+    });
+});
+</script>
