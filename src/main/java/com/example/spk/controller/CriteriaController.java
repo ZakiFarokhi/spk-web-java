@@ -34,8 +34,8 @@ public class CriteriaController {
 
     // Form edit criteria
     @PostMapping("/update/{id}")
-    public String update(Criteria criteria) {
-        criteriaService.save(criteria);
+    public String update(@PathVariable Long id, Criteria criteria) {
+        criteriaService.update(id, criteria);
         return "redirect:/criterias"; // Thymeleaf template: criteria/edit.html
     }
 

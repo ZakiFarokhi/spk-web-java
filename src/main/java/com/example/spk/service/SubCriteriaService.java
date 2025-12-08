@@ -32,6 +32,23 @@ public class SubCriteriaService {
         return subCriteriaRepository.findById(id);
     }
 
+    public Optional<SubCriteria> update(Long id, SubCriteria updatedSubCriteria) {
+        Optional<SubCriteria> existingSubCriteria = subCriteriaRepository.findById(id);
+
+        if (existingSubCriteria.isPresent()) {
+            SubCriteria subCriteriaToUpdate = existingSubCriteria.get();
+
+            subCriteriaToUpdate.setCode(updatedSubCriteria.getCode());
+            subCriteriaToUpdate.setName(updatedSubCriteria.getName());
+
+            // 3. Simpan perubahan (Karena ID ada, JPA melakukan UPDATE)
+            SubCriteria savedEntity = subCriteriaRepository.save(subCriteriaToUpdate);
+            return Optional.of(savedEntity);
+        } else {
+            return Optional.empty(); // Data tidak ditemukan
+        }
+    }
+
     public SubCriteria save(SubCriteria subCriteria) {
         return subCriteriaRepository.save(subCriteria);
     }

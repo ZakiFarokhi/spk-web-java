@@ -37,6 +37,28 @@ public class CripsService {
         return cripsRepository.save(crips);
     }
 
+    public Optional<Crips> update(Long id, Crips updatedCrips) {
+        Optional<Crips> existingCrips = cripsRepository.findById(id);
+
+        if (existingCrips.isPresent()) {
+            Crips cripsToUpdate = existingCrips.get();
+
+            cripsToUpdate.setDescription(updatedCrips.getDescription());
+            cripsToUpdate.setNilai(updatedCrips.getNilai());
+
+            // 3. Simpan perubahan (Karena ID ada, JPA melakukan UPDATE)
+            Crips savedEntity = cripsRepository.save(cripsToUpdate);
+            return Optional.of(savedEntity);
+        } else {
+            return Optional.empty(); // Data tidak ditemukan
+        }
+    }
+
+    public Crips update(Crips crips) {
+
+        return cripsRepository.save(crips);
+    }
+
     public void deleteById(Long id) {
         cripsRepository.deleteById(id);
     }

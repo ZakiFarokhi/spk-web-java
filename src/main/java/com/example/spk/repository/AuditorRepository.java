@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface AuditorRepository extends JpaRepository<Auditor, Long> {
     @EntityGraph(attributePaths = "pendidikan")
-    Optional<Auditor> findByNama(String nama);
-    boolean existsByNama(String username);
+    Optional<Auditor> findByName(String name);
+    boolean existsByName(String username);
     boolean existsByJabatan(String jabatan);
 }

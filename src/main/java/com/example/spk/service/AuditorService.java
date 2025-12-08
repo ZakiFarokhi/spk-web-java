@@ -3,6 +3,7 @@ package com.example.spk.service;
 import com.example.spk.dto.AuditorDto;
 import com.example.spk.dto.UserDto;
 import com.example.spk.entity.Auditor;
+import com.example.spk.entity.SubCriteria;
 import com.example.spk.entity.User;
 import com.example.spk.repository.AuditorRepository;
 import com.example.spk.repository.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuditorService {
@@ -22,12 +24,12 @@ public class AuditorService {
 
     public List<Auditor> findAll() { return auditorRepository.findAll(); }
 
-    public Auditor findById(Long id) {
-        return auditorRepository.findById(id).orElse(null);
+    public Optional<Auditor> findById(Long id) {
+        return auditorRepository.findById(id);
     }
 
     public boolean namaExists(String nama) {
-        return auditorRepository.existsByNama(nama);
+        return auditorRepository.existsByName(nama);
     }
 
     public boolean jabatanExists(String jabatan) {
@@ -40,7 +42,7 @@ public class AuditorService {
 
     public Auditor create(AuditorDto dto) {
         Auditor auditor = new Auditor();
-        auditor.setNama(dto.getNama());
+        auditor.setName(dto.getName());
         auditor.setNip(dto.getNip());
         auditor.setJabatan(dto.getJabatan());
         auditor.setUnit_kerja(dto.getUnit_kerja());
@@ -54,10 +56,11 @@ public class AuditorService {
     }
 
     public Auditor update(Long id, AuditorDto dto) {
-        Auditor auditor = findById(id);
+        Optional<Auditor> a = auditorRepository.findById(id);
+        Auditor auditor = a.get();
         if (auditor == null) return null;
 
-        auditor.setNama(dto.getNama());
+        auditor.setName(dto.getName());
         auditor.setJabatan(dto.getJabatan());
         auditor.setUnit_kerja(dto.getUnit_kerja());
         auditor.setPendidikan(dto.getPendidikan());

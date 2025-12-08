@@ -12,7 +12,7 @@ public class Auditor {
     private Long id;
 
     @Column(nullable=false, unique=true)
-    private String nama;
+    private String name;
 
     @Column(nullable=false, unique = true)
     private String nip;
@@ -39,8 +39,8 @@ public class Auditor {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getNama() { return nama; }
-    public void setNama(String nama) { this.nama = nama; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public String getNip() { return nip; }
     public void setNip(String nip) { this.nip = nip; }

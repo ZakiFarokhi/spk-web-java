@@ -4,7 +4,7 @@ import com.example.spk.entity.Pendidikan;
 import com.example.spk.entity.Role;
 
 public class AuditorDto {
-    private String nama;
+    private String name;
     private String nip;
     private String jabatan;
     private String unit_kerja;
@@ -12,8 +12,8 @@ public class AuditorDto {
     private Pendidikan pendidikan;
 
     // getters & setters
-    public String getNama() { return nama; }
-    public void setNama(String nama) { this.nama = nama; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public String getNip() { return nip; }
     public void setNip(String nip) { this.nip = nip; }

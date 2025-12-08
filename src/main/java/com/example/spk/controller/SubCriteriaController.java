@@ -50,8 +50,8 @@ public class SubCriteriaController {
 
     // Form edit criteria
     @PostMapping("/update/{id}")
-    public String update(SubCriteria subCriteria) {
-        subCriteriaService.save(subCriteria);
+    public String update(@PathVariable Long id, SubCriteria subCriteria) {
+        subCriteriaService.update(id, subCriteria);
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/edit.html
     }
 
@@ -68,5 +68,11 @@ public class SubCriteriaController {
     public String cripsCreate(Crips crips) {
         cripsService.save(crips);
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/add.html
+    }
+
+    @PostMapping("/crips/update/{id}")
+    public String updateCrips(@PathVariable Long id, Crips crips) {
+        cripsService.update(id, crips);
+        return "redirect:/sub_criterias"; // Thymeleaf template: criteria/edit.html
     }
 }

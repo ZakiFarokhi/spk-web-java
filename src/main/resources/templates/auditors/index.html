@@ -66,7 +66,7 @@
                 <div class="row g-2">
 
                     <div class="col-md-2">
-                        <input class="form-control" name="nama" placeholder="Nama" required>
+                        <input class="form-control" name="name" placeholder="Nama" required>
                     </div>
 
                     <div class="col-md-2">
@@ -120,7 +120,7 @@
                         <!-- VIEW MODE -->
                         <th:block th:if="${!isEdit}">
                             <td th:text="${u.id}"></td>
-                            <td th:text="${u.nama}"></td>
+                            <td th:text="${u.name}"></td>
                             <td th:text="${u.nip}"></td>
                             <td th:text="${u.jabatan}"></td>
                             <td th:text="${u.unit_kerja}"></td>
@@ -145,7 +145,7 @@
                                 <td><strong th:text="${u.id}"></strong></td>
 
                                 <td>
-                                    <input class="form-control" name="nama" th:value="${u.nama}">
+                                    <input class="form-control" name="name" th:value="${u.name}">
                                 </td>
 
                                 <td>
