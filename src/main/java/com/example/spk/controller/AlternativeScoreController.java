@@ -1,9 +1,6 @@
 package com.example.spk.controller;
 
-import com.example.spk.entity.AlternativeScore;
-import com.example.spk.entity.Auditor; // Import entity yang diperlukan
-import com.example.spk.entity.Crips;
-import com.example.spk.entity.SubCriteria;
+import com.example.spk.entity.*;
 import com.example.spk.service.AlternativeScoreService;
 import com.example.spk.service.AuditorService;
 import com.example.spk.service.CripsService;
@@ -78,51 +75,78 @@ public class AlternativeScoreController {
         return scoreMap;
     }
 
-    // -------------------------------------------------------------------------
-    // 2. ENDPOINT UPDATE (POST) UNTUK INLINE EDIT
-    // -------------------------------------------------------------------------
-    @PostMapping("/update/{auditorId}")
-    public String updateScores(
-            @PathVariable Long auditorId,
-            @RequestParam Map<String, String> scores, // Menangkap semua input: scores[SubCriteriaId] = CripsId
-            RedirectAttributes ra) {
+    // di AlternativeScoreController.java
 
+    @GetMapping("/input")
+    public String showInputPage(
+            Model model,
+            // Parameter opsional dari tombol edit di tabel
+            @RequestParam(required = false) Long auditorId) {
+
+        List<Auditor> auditors = auditorService.findAll();
+        List<Criteria> criteria = criteriaService.findAll();
+
+        model.addAttribute("auditors", auditors);
+        model.addAttribute("selectedAuditorId", auditorId); // Kirim ID yang dipilih ke view
+
+        return "alternative-scores/score-input-page";
+    }
+
+    @GetMapping("/input-single")
+    public String showSingleInputPage(
+            @RequestParam("auditorId") Long auditorId,
+            @RequestParam("criteriaId") Long criteriaId,
+            Model model) {
+
+        // 1. Muat Auditor spesifik
         Auditor auditor = auditorService.findById(auditorId)
-                .orElseThrow(() -> new RuntimeException("Auditor tidak ditemukan"));
+                .orElseThrow(() -> new IllegalArgumentException("Auditor tidak ditemukan."));
+
+        // 2. Muat Kriteria spesifik (termasuk Sub Kriteria dan Crips-nya)
+        Criteria criteria = criteriaService.findCriteriaByIdWithDetails(criteriaId) // Asumsi ada method ini
+                .orElseThrow(() -> new IllegalArgumentException("Kriteria tidak ditemukan."));
+
+        // 3. Muat skor yang sudah ada untuk Auditor dan Kriteria ini
+        Map<String, AlternativeScore> scoreMap = alternativeScoreService.findAllScoresAsMapForCriteriaAndAuditor(
+                auditorId, criteria.getSubCriteriaList()); // Asumsi ada method service yang spesifik
+
+        model.addAttribute("auditor", auditor);
+        model.addAttribute("criteria", criteria);
+        model.addAttribute("scoreMap", scoreMap);
+
+        // Gunakan nama file baru
+        return "alternative/scores/score_single_input";
+    }
+
+    @PostMapping("/save-raw-scores-criteria")
+    public String saveRawScoresPerCriteria(
+            @RequestParam("auditorId") Long auditorId,
+            @RequestParam("criteriaId") Long criteriaId,
+            @RequestParam Map<String, String> allParams,
+            RedirectAttributes redirectAttributes) {
 
         try {
-            // Loop melalui Map input dari form
-            // Kunci yang dicari adalah "scores[SubCriteriaId]", Nilai adalah CripsId
-            for (Map.Entry<String, String> entry : scores.entrySet()) {
+            // 1. Ekstrak skor yang relevan
+            Map<Long, Double> rawScores = alternativeScoreService.extractRawScores(allParams);
 
-                // Hanya proses field yang dimulai dengan "scores[" dan memiliki nilai
-                if (entry.getKey().startsWith("scores[") && entry.getValue() != null && !entry.getValue().isEmpty()) {
+            // 2. Simpan/Update (Controller tidak perlu tahu bahwa ini hanya satu kriteria)
+            alternativeScoreService.saveOrUpdateRawScores(auditorId, rawScores);
+            // Note: rawScores di sini hanya berisi SubCriteriaId yang termasuk dalam CriteriaId yang disubmit.
 
-                    // 1. Ekstrak SubCriteriaId dari kunci (misal: "scores[5]" -> 5)
-                    String key = entry.getKey();
-                    Long subCriteriaId = Long.valueOf(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Nilai Kriteria " + criteriaId + " untuk Auditor " + auditorId + " berhasil disimpan/diperbarui!");
 
-                    Long cripsId = Long.valueOf(entry.getValue());
-
-                    // 2. Dapatkan entity SubCriteria dan Crips
-                    SubCriteria subCriteria = subCriteriaService.findById(subCriteriaId)
-                            .orElseThrow(() -> new RuntimeException("SubCriteria tidak ditemukan: " + subCriteriaId));
-                    Crips crips = cripsService.findById(cripsId)
-                            .orElseThrow(() -> new RuntimeException("Crips tidak ditemukan: " + cripsId));
-
-                    // 3. Panggil service untuk menyimpan atau mengupdate skor
-                    alternativeScoreService.saveOrUpdateScore(auditor, subCriteria, crips);
-                }
-            }
-
-            ra.addFlashAttribute("successMessage", "✅ Penilaian untuk " + auditor.getName() + " berhasil diperbarui!");
-
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Gagal menyimpan nilai: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            // Log error (gunakan logger nyata di aplikasi produksi)
-            System.err.println("Gagal memperbarui skor: " + e.getMessage());
-            ra.addFlashAttribute("errorMessage", "❌ Gagal memperbarui penilaian: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Terjadi kesalahan sistem saat menyimpan nilai. Periksa log server.");
+            e.printStackTrace();
         }
 
-        return "redirect:/alternative-scores";
+        return "redirect:/alternative-scores/input";
     }
+
 }

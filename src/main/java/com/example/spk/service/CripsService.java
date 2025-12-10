@@ -62,4 +62,27 @@ public class CripsService {
     public void deleteById(Long id) {
         cripsRepository.deleteById(id);
     }
+
+    public Crips findBestMatch(SubCriteria subCriteria, Double rawValue) {
+        // 1. Ambil semua Crips untuk SubCriteria ini, diurutkan DESCENDING (dari Nilai tertinggi ke terendah)
+        List<Crips> cripsList = cripsRepository.findBySubCriteriaOrderByNilaiDesc(subCriteria);
+
+        if (cripsList.isEmpty()) {
+            throw new IllegalStateException("Tidak ada data Crips yang didefinisikan untuk Sub Kriteria: " + subCriteria.getName());
+        }
+
+        // 2. Iterasi untuk mencari Crips yang memenuhi batas bawah
+        for (Crips crips : cripsList) {
+            // Jika Raw Value (input) lebih besar atau sama dengan Nilai Crips,
+            // maka Crips ini adalah kualifikasi tertinggi yang dicapai.
+            if (rawValue >= crips.getNilai()) {
+                return crips;
+            }
+        }
+
+        // 3. Jika Raw Value terlalu rendah (di bawah Nilai Crips terkecil)
+        //    maka kembalikan Crips dengan Nilai terkecil/terendah (biasanya Crips terburuk).
+        //    Karena diurutkan DESCENDING, Crips terkecil adalah elemen terakhir.
+        return cripsList.get(cripsList.size() - 1);
+    }
 }

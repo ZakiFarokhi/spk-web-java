@@ -10,4 +10,5 @@ public interface CripsRepository extends JpaRepository<Crips, Long> {
 
     List<Crips> findBySubCriteriaId(Long subCriteriaId);
     List<Crips> findBySubCriteria(SubCriteria subCriteria);
+    List<Crips> findBySubCriteriaOrderByNilaiDesc(SubCriteria subCriteria);
 }

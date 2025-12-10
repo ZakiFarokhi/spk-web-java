@@ -1,207 +1,228 @@
 <!DOCTYPE html>
-<html layout:decorate="~{shared/layout}"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html layout:decorate="~{shared/layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Sub Criteria Management</title>
     <style>
         /* TABEL */
         table.table-hover tbody tr:hover {
-        background-color: #f7f7f7;
+            background-color: #f7f7f7;
         }
-        td, th {
-        vertical-align: middle !important;
+
+        td,
+        th {
+            vertical-align: middle !important;
         }
+
         /* INLINE EDIT */
         tr.edit-row {
-        background: #fffceb !important;
+            background: #fffceb !important;
         }
+
         /* HIGHLIGHT ROW WHEN EXPANDED */
         tr.bg-light {
-        background-color: #f8f9fa !important;
+            background-color: #f8f9fa !important;
         }
+
         /* CARD STYLE */
         .card {
-        margin: 10px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
+
         .card-header {
-        margin: 10px;
-        background: #3c8dbc;
-        color: white;
-        border-radius: 12px 12px 0 0 !important;
+            margin: 10px;
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
         }
+
         /* Custom Table CSS */
         .custom-table {
-        display: table;
-        width: 100%; /* Pastikan tabel kustom mengambil lebar penuh */
-        border-collapse: collapse; /* Meniru perilaku tabel */
+            display: table;
+            width: 100%;
+            /* Pastikan tabel kustom mengambil lebar penuh */
+            border-collapse: collapse;
+            /* Meniru perilaku tabel */
         }
+
         /* Custom Row CSS */
         .custom-row {
-        display: table-row;
+            display: table-row;
         }
+
         /* Custom Cell CSS */
         .custom-cell {
-        display: table-cell;
-        padding: 0.75rem; /* Meniru padding default Bootstrap untuk sel */
-        border: 1px solid #dee2e6; /* Meniru border tabel */
-        vertical-align: middle !important; /* Meniru 'td, th' */
+            display: table-cell;
+            padding: 0.75rem;
+            /* Meniru padding default Bootstrap untuk sel */
+            border: 1px solid #dee2e6;
+            /* Meniru border tabel */
+            vertical-align: middle !important;
+            /* Meniru 'td, th' */
         }
+
         .custom-table .custom-row:hover {
-        background-color: #f7f7f7;
+            background-color: #f7f7f7;
         }
+
         .custom-cell {
-        vertical-align: middle !important;
+            vertical-align: middle !important;
         }
+
         .custom-row.edit-row {
-        background: #fffceb !important;
+            background: #fffceb !important;
         }
+
         .custom-row.bg-light {
-        background-color: #f8f9fa !important;
+            background-color: #f8f9fa !important;
         }
+
         .custom-row.bg-light .custom-cell {
-        font-weight: bold;
-        border-bottom-width: 2px;
+            font-weight: bold;
+            border-bottom-width: 2px;
         }
     </style>
 </head>
+
 <body>
 <th:block layout:fragment="content">
-    <div > <section class="content pt-3">
-        <div class="container-fluid">
-
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title m-0">📝 Penilaian Auditor Berdasarkan Kriteria</h3>
-                </div>
-
-                <div class="card-body">
-
-                    <p class="alert alert-info">Klik pada judul Kriteria untuk melihat atau menyembunyikan tabel penilaian.</p>
-
-                    <th:block th:each="c : ${criterias}">
-
-                        <div class="bg-info text-white p-3 mt-4 rounded d-flex justify-content-between align-items-center"
-                             data-toggle="collapse"
-                             th:data-target="'#collapse-' + ${c.id}"
-                             aria-expanded="false"
-                             th:aria-controls="'collapse-' + ${c.id}"
-                             style="cursor: pointer;">
-
-                            <h4 class="m-0">
-                                <i class="fas fa-caret-down me-2"></i>
-                                <span th:text="${c.code} + ' - ' + ${c.name}">K1 - Kompetensi</span>
-                            </h4>
-
-                            <span class="badge bg-light text-dark fs-6" th:text="'Bobot: ' + ${#numbers.formatDecimal(c.bobot, 1, 2)}">Bobot: 0.3</span>
-                        </div>
-
-                        <div class="collapse" th:id="'collapse-' + ${c.id}">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover scoring-group-table mt-2" th:id="'table-c-' + ${c.id}">
-
-                                    <thead>
-                                    <tr class="bg-light text-center">
-                                        <th style="width: 50px;">ID</th>
-                                        <th style="min-width: 150px;">Nama Auditor</th>
-
-                                        <th th:each="sc : ${c.subCriteriaList}"
-                                            th:text="${sc.code} + ' - ' + ${sc.name}"
-                                            style="min-width: 120px;">
-                                            SK1 - Pendidikan
-                                        </th>
-
-                                        <th style="width: 120px;">Aksi</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody>
-                                    <th:block th:each="auditor : ${auditors}">
-
-                                        <tr th:id="'row-' + ${auditor.id} + '-c-' + ${c.id}"
-                                            th:with="isEdit=${#strings.equals(param.edit, auditor.id + '')}"
-                                            th:classappend="${isEdit} ? 'edit-row' : ''">
-
-                                            <td th:text="${auditor.id}">1</td>
-                                            <td th:text="${auditor.name}">Nama Auditor</td>
-
-                                            <th:block th:if="${isEdit}">
-                                                <form th:action="@{'/alternative-scores/update/' + ${auditor.id}}" method="post" style="display: contents;">
-
-                                                    <th:block th:each="sc : ${c.subCriteriaList}">
-
-                                                        <th:block th:with="scoreKey=${auditor.id + '_' + sc.id}">
-
-                                                            <th:block th:with="existingScore=${scoreMap.get(scoreKey)}">
-
-                                                                <td>
-                                                                    <select class="form-control form-control-sm"
-                                                                            th:name="|scores[${sc.id}]|" required>
-
-                                                                        <option value="">-- Pilih Crips --</option>
-
-                                                                        <option th:each="cr : ${cripsList}"
-                                                                                th:value="${cr.id}"
-                                                                                th:text="${cr.description} + ' (' + ${cr.nilai} + ')'"
-
-                                                                                th:selected="${existingScore != null and existingScore.crips.id == cr.id}">
-                                                                        </option>
-                                                                    </select>
-                                                                </td>
-                                                            </th:block>
-                                                        </th:block>
-                                                    </th:block>
-
-                                                    <td class="text-center">
-                                                        <button class="btn btn-success btn-sm me-1" type="submit"><i class="fas fa-check"></i> Simpan</button>
-                                                        <a th:href="@{/alternative-scores}" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i> Batal</a>
-                                                    </td>
-                                                </form>
-                                            </th:block>
-
-                                            <th:block th:unless="${isEdit}">
+    <div>
+        <section class="content pt-3">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title m-0">📝 Penilaian Auditor Berdasarkan Kriteria</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="alert alert-info">Klik pada judul Kriteria untuk melihat atau menyembunyikan tabel penilaian.
+                        </p>
+                        <th:block th:each="c : ${criterias}">
+                            <div class="bg-info text-white p-3 mt-4 rounded d-flex justify-content-between align-items-center"
+                                 data-toggle="collapse" th:data-target="'#collapse-' + ${c.id}" aria-expanded="false"
+                                 th:aria-controls="'collapse-' + ${c.id}" style="cursor: pointer;">
+                                <h4 class="m-0">
+                                    <i class="fas fa-caret-down me-2"></i>
+                                    <span th:text="${c.code} + ' - ' + ${c.name}">K1 - Kompetensi</span>
+                                </h4>
+                                <span class="badge bg-light text-dark fs-6"
+                                      th:text="'Bobot: ' + ${#numbers.formatDecimal(c.bobot, 1, 2)}">Bobot: 0.3</span>
+                            </div>
+                            <div class="collapse" th:id="'collapse-' + ${c.id}">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover scoring-group-table mt-2"
+                                           th:id="'table-c-' + ${c.id}">
+                                        <thead>
+                                        <tr class="bg-light text-center">
+                                            <th style="width: 50px;">ID</th>
+                                            <th style="min-width: 150px;">Nama Auditor</th>
+                                            <th th:each="sc : ${c.subCriteriaList}" th:text="${sc.code} + ' - ' + ${sc.name}"
+                                                style="min-width: 120px;">
+                                                SK1 - Pendidikan
+                                            </th>
+                                            <th style="width: 120px;">Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <th:block th:each="auditor : ${auditors}">
+                                            <tr th:id="'row-' + ${auditor.id} + '-c-' + ${c.id}"
+                                                th:with="isEdit=${#strings.equals(param.edit, auditor.id + '')}"
+                                                th:classappend="${isEdit} ? 'edit-row' : ''">
+                                                <td th:text="${auditor.id}">1</td>
+                                                <td th:text="${auditor.name}">Nama Auditor</td>
 
                                                 <th:block th:each="sc : ${c.subCriteriaList}">
-
                                                     <th:block th:with="scoreKey=${auditor.id + '_' + sc.id}">
-
                                                         <th:block th:if="${scoreMap.containsKey(scoreKey)}">
                                                             <th:block th:with="existingScore=${scoreMap.get(scoreKey)}">
-                                                                <td th:text="${existingScore.crips.description + ' (' + #numbers.formatDecimal(existingScore.rawValue, 1, 2) + ')'}">
+                                                                <td
+                                                                        th:text="${existingScore.crips.description + ' (' + #numbers.formatDecimal(existingScore.rawValue, 1, 2) + ')'}">
                                                                 </td>
                                                             </th:block>
                                                         </th:block>
-
                                                         <th:block th:unless="${scoreMap.containsKey(scoreKey)}">
                                                             <td>0</td>
                                                         </th:block>
-
                                                     </th:block>
                                                 </th:block>
-
+                                                <!-- Button trigger modal -->
                                                 <td class="text-center">
-                                                    <a th:href="@{'/alternative-scores?edit=' + ${auditor.id} + '#table-c-' + ${c.id}}" class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
+                                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                                            th:data-target="'#modal'+${auditor.id}+'table-c-'+${c.id}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
                                                 </td>
-                                            </th:block>
 
-                                        </tr>
-                                    </th:block>
-                                    </tbody>
-                                </table>
+                                                <!-- Modal -->
+                                                <div class="modal fade" th:id="'modal'+${auditor.id}+'table-c-'+${c.id}" tabindex="-1"
+                                                     role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form th:action="@{/alternative-scores/save-raw-scores}" method="post">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="exampleModalLabel" th:text="${auditor.name}"></h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <input type="hidden" name="auditorId" th:value="${auditor.id}" />
+                                                                <div class="mb-4">
+                                                                    <h6 class="text-info"
+                                                                        th:text="${c.code} + ': ' + ${c.name} + ' (Bobot: ' + ${#numbers.formatDecimal(c.bobot, 1, 2)} + ')'">
+                                                                        K1: Kompetensi</h6>
+                                                                    <hr class="my-1" />
+
+                                                                    <div class="row">
+                                                                        <th:block th:each="sc : ${c.subCriteriaList}">
+                                                                            <div class="col-md-6 mb-3">
+
+                                                                                <label class="form-label" th:for="|raw_scores[${sc.id}]|">
+                                                                                    <span th:text="${sc.code} + ' - ' + ${sc.name}">SK1 - Pendidikan</span>
+                                                                                </label>
+
+                                                                                <input type="number" step="0.01" min="0"
+                                                                                       class="form-control form-control-sm" th:id="|raw_scores[${sc.id}]|"
+                                                                                       th:name="|raw_scores[${sc.id}]|" required placeholder="Contoh: 4.50"
+                                                                                       th:value="${scoreMap.containsKey(auditor.id + '_' + sc.id) ? scoreMap.get(auditor.id + '_' + sc.id).rawValue : ''}" />
+                                                                                <div class="form-text mt-1 p-1 bg-light rounded border border-secondary border-opacity-25"
+                                                                                        style="font-size: 0.8em; line-height: 1.3;">
+                                                                                    <strong class="text-secondary">Crips:</strong>
+                                                                                    <span th:each="cr, iterStat : ${sc.cripsList}">
+                                                                                        <span th:text="${cr.getDescription()} + ' (' + ${#numbers.formatDecimal(cr.getNilai(), 1, 2)} + ')'"></span>
+                                                                                        <span th:if="${!iterStat.last}">| </span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </th:block>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                                            </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </tr>
+                                        </th:block>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div> </th:block>
-
+                        </th:block>
+                    </div>
                 </div>
             </div>
-
-        </div>
-    </section>
+        </section>
     </div>
 </th:block>
 <th:block th:replace="~{layouts/main :: layout(~{::content})}"></th:block>
 </body>
+
 </html>

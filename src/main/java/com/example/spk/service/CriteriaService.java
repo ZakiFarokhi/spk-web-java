@@ -34,6 +34,11 @@ public class CriteriaService {
         return criteriaRepository.save(criteria);
     }
 
+    public Optional<Criteria> findCriteriaByIdWithDetails(Long criteriaId) {
+        // Memanggil Query Method khusus yang menggunakan JOIN FETCH
+        return criteriaRepository.findByIdWithDetails(criteriaId);
+    }
+
     public Optional<Criteria> update(Long id, Criteria updatedCriteria) {
         Optional<Criteria> existingCriteria = criteriaRepository.findById(id);
 

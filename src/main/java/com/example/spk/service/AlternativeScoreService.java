@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AlternativeScoreService {
@@ -27,35 +26,6 @@ public class AlternativeScoreService {
     @Autowired
     private CripsService cripsService;
 
-    @Transactional
-    public AlternativeScore saveOrUpdateScore(Long auditorId, Long subCriteriaId, Long cripsId) {
-        // 1. Ambil semua entitas yang diperlukan
-        Auditor auditor = auditorService.findById(auditorId)
-                .orElseThrow(() -> new RuntimeException("Alternative ID not found: " + auditorId));
-        SubCriteria subCriteria = subCriteriaService.findById(subCriteriaId)
-                .orElseThrow(() -> new RuntimeException("SubCriteria ID not found: " + subCriteriaId));
-        Crips crips = cripsService.findById(cripsId)
-                .orElseThrow(() -> new RuntimeException("Crips ID not found: " + cripsId));
-
-        // Nilai mentah yang akan disimpan
-        Double rawValue = crips.getNilai(); // Asumsi: Crips memiliki field getNilai() atau getValue()
-
-        // 2. Cek apakah penilaian sudah ada (Matriks Keputusan Awal)
-        Optional<AlternativeScore> existingScore = alternativeScoreRepository.findByAuditorAndSubCriteria(auditor, subCriteria);
-
-        if (existingScore.isPresent()) {
-            // 3. Jika sudah ada, lakukan UPDATE
-            AlternativeScore scoreToUpdate = existingScore.get();
-            scoreToUpdate.setCrips(crips);
-            scoreToUpdate.setRawValue(rawValue);
-            return alternativeScoreRepository.save(scoreToUpdate);
-        } else {
-            // 4. Jika belum ada, lakukan CREATE
-            AlternativeScore newScore = new AlternativeScore(auditor, subCriteria, crips, rawValue);
-            return alternativeScoreRepository.save(newScore);
-        }
-    }
-
     public List<AlternativeScore> findAllScores() {
         return alternativeScoreRepository.findAll();
     }
@@ -65,34 +35,132 @@ public class AlternativeScoreService {
                 .orElseThrow(() -> new RuntimeException("Alternative ID not found: " + alternativeId));
         return alternativeScoreRepository.findByAuditor(alternative);
     }
-    @Transactional
-    public void saveOrUpdateScore(Auditor auditor, SubCriteria subCriteria, Crips crips) {
-
-        // 1. Cari skor yang sudah ada berdasarkan ID Auditor dan Sub-Kriteria
-        Optional<AlternativeScore> existingScore = alternativeScoreRepository
-                .findByAuditorIdAndSubCriteriaId(auditor.getId(), subCriteria.getId());
-
-        AlternativeScore score;
-
-        // 2 & 3. Dapatkan skor yang sudah ada ATAU buat objek baru jika tidak ada.
-         score = existingScore.orElseGet(() -> {
-            // Ini adalah Supplier (lambda function) yang hanya dieksekusi jika Optional kosong
-            AlternativeScore newScore = new AlternativeScore();
-            newScore.setAuditor(auditor);
-            newScore.setSubCriteria(subCriteria);
-            return newScore;
-        });
-
-        // 4. Set nilai baru (Crips dan rawValue)
-        // rawValue diambil dari nilai numerik yang ada di entity Crips
-        score.setCrips(crips);
-        score.setRawValue(crips.getNilai()); // Asumsi field numerik Crips adalah 'nilai'
-
-        // 5. Simpan (Spring Data JPA akan otomatis menentukan apakah ini INSERT atau UPDATE)
-        alternativeScoreRepository.save(score);
-    }
 
     public void deleteScore(Long id) {
         alternativeScoreRepository.deleteById(id);
+    }
+
+    public Map<Long, Double> extractRawScores(Map<String, String> allParams) {
+        Map<Long, Double> rawScores = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            // Hanya proses parameter yang bernama 'raw_scores[ID_SUBKRITERIA]'
+            if (key.startsWith("raw_scores[") && key.endsWith("]")) {
+                try {
+                    // Ekstraksi ID Sub Criteria
+                    String idStr = key.substring(11, key.length() - 1);
+                    Long subCriteriaId = Long.parseLong(idStr);
+
+                    // Konversi nilai mentah (Raw Value) ke Double
+                    Double rawValue = Double.parseDouble(value);
+                    if (rawValue < 0) throw new NumberFormatException("Nilai tidak boleh negatif.");
+
+                    rawScores.put(subCriteriaId, rawValue);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Nilai skor tidak valid atau format salah untuk kriteria: " + key, e);
+                }
+            }
+        }
+        if (rawScores.isEmpty()) {
+            throw new IllegalArgumentException("Tidak ada nilai skor yang dikirimkan.");
+        }
+        return rawScores;
+    }
+
+    /**
+     * Menyimpan atau memperbarui semua Raw Score untuk Auditor yang ditentukan.
+     */
+    @Transactional
+    public void saveOrUpdateRawScores(Long auditorId, Map<Long, Double> rawScores) {
+        // 1. Validasi keberadaan Auditor (Penyebab utama error not-null sebelumnya)
+        Auditor auditor = auditorService.findById(auditorId)
+                .orElseThrow(() -> new IllegalArgumentException("Auditor tidak ditemukan dengan ID: " + auditorId));
+
+        for (Map.Entry<Long, Double> entry : rawScores.entrySet()) {
+            Long subCriteriaId = entry.getKey();
+            Double rawValue = entry.getValue();
+
+            // 2. Validasi keberadaan SubCriteria
+            SubCriteria sc = subCriteriaService.findById(subCriteriaId)
+                    .orElseThrow(() -> new IllegalArgumentException("Sub Kriteria tidak ditemukan dengan ID: " + subCriteriaId));
+
+            // 3. Tentukan Crips yang cocok
+            Crips matchedCrips = cripsService.findBestMatch(sc, rawValue);
+
+            System.out.println("LOADED TEST");
+            System.out.println(matchedCrips.getDescription());
+            System.out.println(matchedCrips.getSubCriteria().getId());
+            System.out.println(auditorId);
+            System.out.println(auditor.getName());
+            System.out.println(auditor.getId());
+
+            // 4. Cari skor yang sudah ada, atau buat objek baru
+            Optional<AlternativeScore> existingScoreOpt = alternativeScoreRepository.findByAuditorAndSubCriteria(auditor, sc);
+            AlternativeScore scoreToSave = existingScoreOpt.orElseGet(AlternativeScore::new);
+
+            // 5. Set/Update data
+            scoreToSave.setAuditor(auditor);
+            scoreToSave.setSubCriteria(sc);
+            scoreToSave.setRawValue(rawValue);
+            scoreToSave.setCrips(matchedCrips);
+
+            // 6. Simpan ke database (Akan menghasilkan INSERT atau UPDATE)
+            alternativeScoreRepository.save(scoreToSave);
+            // DEBUG: Jika Anda tidak melihat query, tambahkan System.out.println di sini untuk verifikasi.
+        }
+    }
+
+    /**
+     * Mencari Crips yang memiliki nilai (nilai) paling dekat dengan rawValue yang diinput.
+     * Ini memastikan bahwa data yang disimpan selalu terkait dengan Crips yang valid.
+     */
+    private Crips findBestMatchingCrips(List<Crips> allCrips, Double rawValue) {
+        // Gunakan fungsi min untuk mencari Crips dengan selisih absolut terkecil
+        return allCrips.stream()
+                .min(Comparator.comparingDouble(crips -> Math.abs(crips.getNilai() - rawValue)))
+                .orElse(null);
+    }
+
+    public Map<String, AlternativeScore> findAllScoresAsMap() {
+        List<AlternativeScore> scores = alternativeScoreRepository.findAll();
+        Map<String, AlternativeScore> scoreMap = new HashMap<>( );
+
+        for (AlternativeScore score : scores) {
+            // Membuat kunci unik dari ID Auditor dan ID SubCriteria
+            String key = score.getAuditor().getId() + "_" + score.getSubCriteria().getId();
+            scoreMap.put(key, score);
+        }
+        return scoreMap;
+    }
+
+    public Map<String, AlternativeScore> findAllScoresAsMapForCriteriaAndAuditor(
+            Long auditorId,
+            List<SubCriteria> subCriteriaList) {
+
+        Map<String, AlternativeScore> scoreMap = new HashMap<>();
+
+        // 1. Muat objek Auditor (Penting untuk findByAuditorAndSubCriteria)
+        Auditor auditor = auditorService.findById(auditorId)
+                .orElseThrow(() -> new IllegalArgumentException("Auditor tidak ditemukan dengan ID: " + auditorId));
+
+        // 2. Iterasi melalui Sub Criteria yang relevan dan cari skor yang sudah ada
+        for (SubCriteria sc : subCriteriaList) {
+
+            // Gunakan repository method untuk mencari skor berdasarkan pasangan Auditor dan SubCriteria
+            Optional<AlternativeScore> existingScoreOpt =
+                    alternativeScoreRepository.findByAuditorAndSubCriteria(auditor, sc);
+
+            if (existingScoreOpt.isPresent()) {
+                AlternativeScore score = existingScoreOpt.get();
+                // Format key sesuai dengan kebutuhan Thymeleaf di form input
+                String key = auditorId + "_" + sc.getId();
+                scoreMap.put(key, score);
+            }
+        }
+
+        return scoreMap;
     }
 }
