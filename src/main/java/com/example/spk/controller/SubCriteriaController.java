@@ -75,4 +75,10 @@ public class SubCriteriaController {
         cripsService.update(id, crips);
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/edit.html
     }
+
+    @PostMapping("/crips/delete/{id}")
+    public String deleteCrips(@PathVariable Long id) {
+        cripsService.deleteById(id);
+        return "redirect:/sub_criterias";
+    }
 }
