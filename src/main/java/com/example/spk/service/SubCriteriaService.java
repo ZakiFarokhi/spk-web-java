@@ -27,6 +27,9 @@ public class SubCriteriaService {
     public List<SubCriteria> findByCriteria(Long criteriaId) {
         return subCriteriaRepository.findByCriteriaId(criteriaId);
     }
+    public List<SubCriteria> findByCriteriaId(Long criteriaId) {
+        return subCriteriaRepository.findByCriteriaId(criteriaId);
+    }
 
     public Optional<SubCriteria> findById(Long id) {
         return subCriteriaRepository.findById(id);

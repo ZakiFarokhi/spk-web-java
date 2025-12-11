@@ -14,7 +14,7 @@
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <img alt="User Image" class="img-circle elevation-2"
-                     src="https://avatar.iran.liara.run/public/46">
+                     src="/webjars/AdminLTE/3.2.0/dist/img/AdminLTELogo.png">
             </div>
             <div class="info">
                 <a class="d-block" href="#" th:text="${username}">John Doe</a>
@@ -64,6 +64,28 @@
                         <p>Data Konversi</p>
                     </a>
                 </li>
+                <li class="nav-item has-treeview">
+                    <a class="nav-link" href="#">
+                        <i class="nav-icon fas fa-copy"></i>
+                        <p>
+                            Data Konversi
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+
+                        <th:block >
+                            <div th:each="c : ${criterias}">
+                                <li  class="nav-item">
+                                    <a class="nav-link" th:href="'/auditor-scores/'+${c.id}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p th:text="${c.name}">List User</p>
+                                    </a>
+                                </li>
+                            </div>
+                        </th:block>
+                    </ul>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/about">
                         <i class="nav-icon fas fa-th"></i>
@@ -76,12 +98,8 @@
                         <p>Hasil Akhir</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>User</p>
-                    </a>
-                </li>
+
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
