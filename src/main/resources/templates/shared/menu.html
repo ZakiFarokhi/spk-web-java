@@ -14,10 +14,12 @@
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <img alt="User Image" class="img-circle elevation-2"
-                     src="/webjars/AdminLTE/3.2.0/dist/img/AdminLTELogo.png">
+                     th:src="@{/assets/img/Jakarta-logo.png}">
             </div>
             <div class="info">
-                <a class="d-block" href="#" th:text="${username}">John Doe</a>
+                <th:block>
+                    <a class="d-block" href="#" th:text="${username}">John Doe</a>
+                </th:block>
             </div>
         </div>
 
@@ -58,12 +60,12 @@
                         <p>Data Sub Criteria</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/alternative-scores">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>Data Konversi</p>
-                    </a>
-                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="/alternative-scores">-->
+<!--                        <i class="nav-icon fas fa-th"></i>-->
+<!--                        <p>Data Konversi</p>-->
+<!--                    </a>-->
+<!--                </li>-->
                 <li class="nav-item has-treeview">
                     <a class="nav-link" href="#">
                         <i class="nav-icon fas fa-copy"></i>
@@ -86,18 +88,18 @@
                         </th:block>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>Perhitungan</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>Hasil Akhir</p>
-                    </a>
-                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="/about">-->
+<!--                        <i class="nav-icon fas fa-th"></i>-->
+<!--                        <p>Perhitungan</p>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="/about">-->
+<!--                        <i class="nav-icon fas fa-th"></i>-->
+<!--                        <p>Hasil Akhir</p>-->
+<!--                    </a>-->
+<!--                </li>-->
 
 
             </ul>
