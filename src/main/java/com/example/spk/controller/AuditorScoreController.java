@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,9 @@ public class AuditorScoreController {
      * URL: /auditor-scores/{id}
      */
     @GetMapping("/{criteriaId}")
-    public String showScoreInput(@PathVariable Long criteriaId, Model model) {
-
+    public String showScoreInput(@PathVariable Long criteriaId, Model model, Principal principal) {
+          model.addAttribute("username", principal != null ? principal.getName() : "Guest");
+          model.addAttribute("criterias", criteriaRepository.findAll());
         Criteria criteria = criteriaRepository.findById(criteriaId)
                 .orElseThrow(() -> new RuntimeException("Kriteria tidak ditemukan."));
         model.addAttribute("criteria", criteria);

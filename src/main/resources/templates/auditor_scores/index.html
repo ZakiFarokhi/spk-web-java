@@ -3,14 +3,12 @@
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>
+<!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
     <style>
-        /* [TEMPAT STYLE YANG ANDA BERIKAN SEBELUMNYA] */
         table.table-hover tbody tr:hover { background-color: #f7f7f7; }
         td, th { vertical-align: middle !important; }
         .card { margin: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
         .card-header { background: #3c8dbc; color: white; border-radius: 12px 12px 0 0 !important; }
-        /* ... style lainnya ... */
     </style>
 </head>
 
@@ -21,7 +19,7 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title m-0">📝 Penilaian Auditor: <span th:text="${criteria.name}"></span></h3>
+<!--                        <h3 class="card-title m-0">📝 Penilaian Auditor: <span th:text="${criteria.name}"></span></h3>-->
                     </div>
 
                     <div class="card-body">
@@ -79,19 +77,19 @@
 
                                             <th:block th:each="sc : ${subCriteriaList}">
                                                 <td class="text-center">
-<!--                                                    <th:block th:with="scoreKey=${auditor.id + '_' + sc.id},-->
-<!--                                                                            currentScore=${scoreMap.get(scoreKey)}">-->
+                                                    <th:block th:with="scoreKey=${auditor.id + '_' + sc.id},
+                                                                            currentScore=${scoreMap.get(scoreKey)}">
 
-<!--                                                        <div th:if="${currentScore.crips != null}" class="badge bg-success p-2">-->
-<!--                                                            <span th:text="${currentScore.crips.description}">Baik</span>-->
-<!--                                                            <span th:text="' (' + ${#numbers.formatDecimal(currentScore.rawValue, 1, 2)} + ')'">(4.00)</span>-->
-<!--                                                        </div>-->
+                                                        <div th:if="${currentScore.crips != null}" class="badge bg-success p-2">
+                                                            <span th:text="${currentScore.crips.description}">Baik</span>
+                                                            <span th:text="' (' + ${#numbers.formatDecimal(currentScore.rawValue, 1, 2)} + ')'">(4.00)</span>
+                                                        </div>
 
-<!--                                                        <div th:unless="${currentScore.crips != null}" class="badge bg-secondary p-2">-->
-<!--                                                            Belum Dinilai (<span th:text="${#numbers.formatDecimal(currentScore.rawValue, 1, 2)}">0.00</span>)-->
-<!--                                                        </div>-->
+                                                        <div th:unless="${currentScore.crips != null}" class="badge bg-secondary p-2">
+                                                            Belum Dinilai (<span th:text="${#numbers.formatDecimal(currentScore.rawValue, 1, 2)}">0.00</span>)
+                                                        </div>
 
-<!--                                                    </th:block>-->
+                                                    </th:block>
                                                 </td>
                                             </th:block>
                                         </tr>
