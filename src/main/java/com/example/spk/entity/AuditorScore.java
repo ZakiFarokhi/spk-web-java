@@ -28,14 +28,18 @@ public class AuditorScore {
     @Column(name = "raw_value", nullable = false, columnDefinition = "DECIMAL(5,2)")
     private Double rawValue;
 
+    @Column(name = "normalized_value", columnDefinition = "DECIMAL(5,4)", nullable = true)
+    private Double normalizedValue;
+
     public AuditorScore() {}
 
-    public AuditorScore(Auditor auditor,Criteria criteria, SubCriteria subCriteria, Crips crips, Double rawValue) {
+    public AuditorScore(Auditor auditor,Criteria criteria, SubCriteria subCriteria, Crips crips, Double rawValue,  Double normalizedValue) {
         this.auditor = auditor;
         this.subCriteria = subCriteria;
         this.crips = crips;
         this.rawValue = rawValue;
         this.criteria = criteria;
+        this.normalizedValue = normalizedValue;
     }
 
     //Getter Setter
@@ -56,4 +60,7 @@ public class AuditorScore {
 
     public Double getRawValue() {return rawValue;}
     public void setRawValue(Double rawValue) {this.rawValue = rawValue;}
+
+    public Double getNormalizedValue() {return normalizedValue;}
+    public void setNormalizedValue(Double normalizedValue) {this.normalizedValue = normalizedValue;}
 }

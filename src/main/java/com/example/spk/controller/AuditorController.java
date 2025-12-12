@@ -2,10 +2,7 @@ package com.example.spk.controller;
 
 import com.example.spk.entity.Auditor;
 import com.example.spk.entity.User;
-import com.example.spk.service.AuditorService;
-import com.example.spk.service.PendidikanService;
-import com.example.spk.service.RoleService;
-import com.example.spk.service.UserService;
+import com.example.spk.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +18,12 @@ public class AuditorController {
 
     private final AuditorService auditorService;
     private final PendidikanService pendidikanService;
+    private final CriteriaService criteriaService;
 
-    public AuditorController(AuditorService auditorService, PendidikanService pendidikanService) {
+    public AuditorController(AuditorService auditorService, PendidikanService pendidikanService, CriteriaService criteriaService) {
         this.auditorService = auditorService;
         this.pendidikanService = pendidikanService;
+        this.criteriaService = criteriaService;
     }
 
     // ➤ LIST USERS
@@ -33,6 +32,8 @@ public class AuditorController {
         model.addAttribute("username", principal != null?principal.getName(): "Guest");
         model.addAttribute("auditors", auditorService.findAll());
         model.addAttribute("pendidikan", pendidikanService.findAll());
+        model.addAttribute("criterias", criteriaService.findAll());
+
         return "auditors/index";
     }
 

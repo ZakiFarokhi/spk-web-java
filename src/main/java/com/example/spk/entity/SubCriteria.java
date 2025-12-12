@@ -18,6 +18,8 @@ public class SubCriteria {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable=true)
+    private Double bobot;
 
     @ManyToOne
     @JoinColumn(name = "criteria_id", nullable = false)
@@ -54,6 +56,13 @@ public class SubCriteria {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Double getBobot() {
+        return bobot;
+    }
+    public void setBobot(Double bobot) {
+        this.bobot = bobot;
     }
 
     public Criteria getCriteria() {

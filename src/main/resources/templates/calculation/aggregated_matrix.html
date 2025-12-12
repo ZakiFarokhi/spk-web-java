@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
+    <style>
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td,
+        th {
+            vertical-align: middle !important;
+        }
+
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="pt-3">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h3 class="card-title m-0">🔥 Matriks Keputusan Akhir (Aggregasi Sub-Kriteria)</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="alert alert-warning">
+                            Nilai-nilai di Matriks ini adalah hasil **rata-rata normalisasi** semua Sub-Kriteria
+                            yang dikelompokkan kembali ke Kriteria utamanya ($R_{c, ij}$).
+                            Matriks ini siap untuk dikalikan dengan bobot Kriteria ($W_j$) pada tahap selanjutnya.
+                        </p>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover mt-3">
+                                <thead>
+                                <tr class="bg-light text-center">
+                                    <th style="width: 20px;">#</th>
+                                    <th style="min-width: 150px;">Auditor (Alternatif)</th>
+
+                                    <th th:each="c : ${criteriaList}"
+                                        class="text-center"
+                                        th:text="${c.code} + ' - ' + ${c.name} + ' (' + ${#numbers.formatDecimal(c.bobot, 1, 2)} + ')'"
+                                        style="min-width: 120px;">
+                                        C1 (Bobot)
+                                    </th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr th:each="auditor, status : ${auditors}">
+                                    <td th:text="${status.count}">1</td>
+                                    <td th:text="${auditor.name}">Nama Auditor A</td>
+
+                                    <th:block th:each="c : ${criteriaList}">
+                                        <td class="text-center">
+                                            <th:block th:with="scoreKey=${auditor.id + '_' + c.id},
+                                                                    aggregatedScore=${aggregatedScoreMap.get(scoreKey)}">
+
+                                                    <span th:if="${aggregatedScore != null}"
+                                                          th:text="${#numbers.formatDecimal(aggregatedScore, 1, 4)}"
+                                                    >0.7500</span>
+
+                                                <span th:unless="${aggregatedScore != null}" class="text-muted">
+                                                        0.0000
+                                                    </span>
+                                            </th:block>
+                                        </td>
+                                    </th:block>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a th:href="@{/calculation/ranking}" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Lanjut ke Perhitungan Ranking Akhir
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+</body>
+
+</html>

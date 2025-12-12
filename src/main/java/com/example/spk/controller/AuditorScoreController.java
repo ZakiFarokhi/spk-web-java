@@ -87,4 +87,25 @@ public class AuditorScoreController {
     }
 
     // Tambahkan method @PostMapping("/update") jika Anda mengimplementasikan update AJAX.
+    @PostMapping("/update-row")
+    public String updateScoreRow(
+            @RequestParam Long auditorId,
+            @RequestParam Long criteriaId,
+            // Gunakan Map<String, String> jika Anda tidak yakin bagaimana Spring me-bind type
+            // Jika Anda yakin Spring bisa mengikatnya, gunakan Map<String, Double> (tapi rawan error)
+            @RequestParam Map<String, String> allParams, // Ganti tipe data menjadi String untuk menerima _csrf
+            RedirectAttributes ra)
+    {
+        try {
+            // Panggil service untuk memproses pembaruan Map ini
+            // Kita meneruskan semua parameter dan biarkan Service yang memfilter dan mengkonversi
+            scoreService.updateScoresFromMap(allParams);
+            ra.addFlashAttribute("successMessage", "Nilai auditor " + auditorId + " berhasil diperbarui!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Gagal update: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return "redirect:/auditor-scores/" + criteriaId;
+    }
 }

@@ -100,7 +100,7 @@ public class DataInitializer {
                         c.setCode("C3");
                         c.setName("Perilaku Kerja");
                         c.setBobot(0.25);
-                        c.setIndeks("BENEFIT");
+                        c.setIndeks("COST");
                         return criteriaRepository.save(c);
                     });
 

@@ -62,7 +62,9 @@ public class AlternativeScoreController {
         model.addAttribute("auditors", auditorService.findAll());
         model.addAttribute("scoreMap", scoreMap);
 
-        return "alternative_scores/index";
+        return "alternative_" +
+                "" +
+                "scores/index";
     }
 
     // Helper method untuk konversi List Skor menjadi Map

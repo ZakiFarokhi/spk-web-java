@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
+    <style>
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td,
+        th {
+            vertical-align: middle !important;
+        }
+
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="pt-3">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title m-0">🏆 Hasil Akhir dan Ranking Auditor</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(rankingResults)}">
+                            <p class="alert alert-warning">
+                                Data ranking belum dihitung. Silakan klik tombol di bawah untuk memulai perhitungan Skor Preferensi ($V_i$).
+                            </p>
+
+                            <form th:action="@{/calculation/ranking/generate}" method="post">
+                                <button type="submit" class="btn btn-lg btn-success">
+                                    <i class="fas fa-play"></i> Generate Ranking Auditor
+                                </button>
+                            </form>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(rankingResults)}">
+                            <div th:if="${calculationSuccess}" class="alert alert-success">
+                                ✅ Perhitungan ranking berhasil diselesaikan!
+                            </div>
+
+                            <h4 class="mb-3">Matriks Nilai Preferensi Akhir ($V_i$)</h4>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover mt-3">
+                                    <thead>
+                                    <tr class="bg-primary text-white text-center">
+                                        <th style="width: 50px;">Ranking</th>
+                                        <th style="min-width: 200px;">Auditor</th>
+                                        <th style="min-width: 150px;">Skor Preferensi ($V_i$)</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr th:each="result, status : ${rankingResults}">
+                                        <td class="text-center fw-bold"
+                                            th:text="${status.count}"
+                                            th:classappend="${status.count == 1 ? 'bg-warning' : ''}">
+                                            1
+                                        </td>
+                                        <td th:text="${result.auditor.name}">Nama Auditor Terbaik</td>
+                                        <td class="text-center fw-bold"
+                                            th:text="${#numbers.formatDecimal(result.finalScore, 1, 6)}"
+                                            th:classappend="${status.count == 1 ? 'bg-warning' : ''}">
+                                            0.954321
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer" th:if="${!#lists.isEmpty(rankingResults)}">
+                        <form th:action="@{/calculation/ranking/generate}" method="post">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Hitung Ulang Ranking
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+</body>
+
+</html>

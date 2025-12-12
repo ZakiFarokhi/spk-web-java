@@ -89,6 +89,9 @@
                     <div class="col-md-2">
                         <input class="form-control" name="name" placeholder="Nama" required>
                     </div>
+                    <div>
+                        <input class="form-control" type="number" min="0" max="1" step="0.01" required name="bobot" placeholder="bobot">
+                    </div>
                     <div class="col-md-2">
                         <button class="btn btn-primary w-100">
                             <i class="fas fa-user-plus"></i> Add Sub Criteria
@@ -103,6 +106,7 @@
                     <th>Kriteria</th>
                     <th>Kode Sub Kriteria</th>
                     <th>Sub Kriteria</th>
+                    <th>Bobot</th>
                     <th>Crips (Nilai Crips)</th>
                     <th style="width: 80px">Aksi Crips</th>
                     <th style="width: 140px">Aksi</th>
@@ -118,6 +122,7 @@
                                 <td th:text="${u.criteria.code} +' - ' + ${u.criteria.name}"></td>
                                 <td th:text="${u.code}"></td>
                                 <td th:text="${u.name}"></td>
+                                <td th:text="${u.bobot}"></td>
                                 <td>
                                     <span th:text="${#lists.size(u.cripsList)}">0</span> Crips
                                 </td>

@@ -3,12 +3,28 @@
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
+    <!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
     <style>
-        table.table-hover tbody tr:hover { background-color: #f7f7f7; }
-        td, th { vertical-align: middle !important; }
-        .card { margin: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
-        .card-header { background: #3c8dbc; color: white; border-radius: 12px 12px 0 0 !important; }
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td,
+        th {
+            vertical-align: middle !important;
+        }
+
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
     </style>
 </head>
 
@@ -19,7 +35,7 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-<!--                        <h3 class="card-title m-0">📝 Penilaian Auditor: <span th:text="${criteria.name}"></span></h3>-->
+                        <!--                        <h3 class="card-title m-0">📝 Penilaian Auditor: <span th:text="${criteria.name}"></span></h3>-->
                     </div>
 
                     <div class="card-body">
@@ -42,7 +58,8 @@
 
                         <div th:unless="${isGenerated}" class="text-center p-5 border rounded">
                             <h4 class="text-danger">Data Penilaian Belum Tersedia</h4>
-                            <p>Untuk kriteria <strong><span th:text="${criteria.name}"></span></strong>, kerangka penilaian belum dibuat. Klik tombol di bawah ini untuk membuat data default (nilai awal 0.0) bagi semua auditor.</p>
+                            <p>Untuk kriteria <strong><span th:text="${criteria.name}"></span></strong>, kerangka penilaian belum
+                                dibuat. Klik tombol di bawah ini untuk membuat data default (nilai awal 0.0) bagi semua auditor.</p>
 
                             <form th:action="@{/auditor-scores/generate/{id}(id=${criteriaId})}" method="post" class="mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg">
@@ -52,7 +69,8 @@
                         </div>
 
                         <div th:if="${isGenerated}">
-                            <p class="alert alert-info">Matriks penilaian sudah terbentuk. Nilai yang ditampilkan adalah nilai mentah (Raw Value) yang tersimpan.</p>
+                            <p class="alert alert-info">Matriks penilaian sudah terbentuk. Nilai yang ditampilkan adalah nilai
+                                mentah (Raw Value) yang tersimpan.</p>
 
                             <th:block th:with="scoreMap=${scoreMap}">
 
@@ -61,37 +79,54 @@
                                         <thead>
                                         <tr class="bg-light text-center">
                                             <th style="width: 50px;">ID</th>
-                                            <th style="min-width: 180px;">Nama Auditor</th>
+                                            <th style="min-width: 120px;">Nama Auditor</th>
 
-                                            <th th:each="sc : ${subCriteriaList}"
-                                                th:text="${sc.code} + ' - ' + ${sc.name}"
+                                            <th th:each="sc : ${subCriteriaList}" th:text="${sc.code} + ' - ' + ${sc.name}"
                                                 style="min-width: 150px;">
                                                 SK1 - Sub Kriteria
                                             </th>
+                                            <th>Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr th:each="auditor : ${auditors}">
-                                            <td th:text="${auditor.id}">1</td>
-                                            <td th:text="${auditor.name}">Nama Auditor A</td>
 
-                                            <th:block th:each="sc : ${subCriteriaList}">
+                                            <form th:action="@{/auditor-scores/update-row}" method="POST">
+
+                                                <td th:text="${auditor.id}">1</td>
+                                                <td th:text="${auditor.name}">Nama Auditor A</td>
+
+                                                <th:block th:each="sc : ${subCriteriaList}">
+                                                    <td class="text-center">
+                                                        <th:block th:with="scoreKey=${auditor.id + '_' + sc.id}, currentScore=${scoreMap.get(scoreKey)}">
+
+                                                            <input type="hidden" th:name="'scoreIds[' + ${currentScore.id} + ']'"
+                                                                   th:value="${currentScore.id}" />
+
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="number" min="0" max="5" step="0.5" class="form-control"
+                                                                       placeholder="Nilai" th:name="'rawValues[' + ${currentScore.id} + ']'"
+                                                                       th:value="${#numbers.formatDecimal(currentScore.rawValue, 1, 2)}" required />
+                                                                <span th:if="${currentScore.crips != null}"
+                                                                      class="input-group-text badge bg-success" th:text="${currentScore.crips.code}"
+                                                                      style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+																			K1
+																		</span>
+                                                            </div>
+
+                                                        </th:block>
+                                                    </td>
+                                                </th:block>
+
                                                 <td class="text-center">
-                                                    <th:block th:with="scoreKey=${auditor.id + '_' + sc.id},
-                                                                            currentScore=${scoreMap.get(scoreKey)}">
+                                                    <input type="hidden" name="auditorId" th:value="${auditor.id}" />
+                                                    <input type="hidden" name="criteriaId" th:value="${criteriaId}" />
 
-                                                        <div th:if="${currentScore.crips != null}" class="badge bg-success p-2">
-                                                            <span th:text="${currentScore.crips.description}">Baik</span>
-                                                            <span th:text="' (' + ${#numbers.formatDecimal(currentScore.rawValue, 1, 2)} + ')'">(4.00)</span>
-                                                        </div>
-
-                                                        <div th:unless="${currentScore.crips != null}" class="badge bg-secondary p-2">
-                                                            Belum Dinilai (<span th:text="${#numbers.formatDecimal(currentScore.rawValue, 1, 2)}">0.00</span>)
-                                                        </div>
-
-                                                    </th:block>
+                                                    <button class="btn btn-warning btn-sm" type="submit">
+                                                        <i class="fas fa-edit"></i> Update
+                                                    </button>
                                                 </td>
-                                            </th:block>
+                                            </form>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -106,4 +141,5 @@
 </th:block>
 
 </body>
+
 </html>

@@ -1,6 +1,8 @@
 package com.example.spk.controller;
 
 import com.example.spk.entity.User;
+import com.example.spk.service.AuditorService;
+import com.example.spk.service.CriteriaService;
 import com.example.spk.service.RoleService;
 import com.example.spk.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -15,10 +17,12 @@ public class UserController {
 
     private final UserService userService;
     private final RoleService roleService;
+    private final CriteriaService criteriaService;
 
-    public UserController(UserService userService, RoleService roleService) {
+    public UserController(UserService userService, RoleService roleService, CriteriaService criteriaService) {
         this.userService = userService;
         this.roleService = roleService;
+        this.criteriaService = criteriaService;
     }
 
     // ➤ LIST USERS
@@ -27,6 +31,7 @@ public class UserController {
         model.addAttribute("username", principal != null?principal.getName(): "Guest");
         model.addAttribute("users", userService.findAll());
         model.addAttribute("roles", roleService.findAll());
+        model.addAttribute("criterias", criteriaService.findAll());
         return "users/index";
     }
 

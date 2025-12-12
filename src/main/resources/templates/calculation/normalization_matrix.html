@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html layout:decorate="~{shared/layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
+    <style>
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
+
+        td,
+        th {
+            vertical-align: middle !important;
+        }
+
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="pt-3">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="card-title m-0">📊 Matriks Normalisasi (R)</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="alert alert-info">
+                            Matriks ini menampilkan nilai mentah setelah dinormalisasi ($r_{ij}$).
+                            Nilai berkisar antara 0 hingga 1.
+                        </p>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover mt-3">
+                                <thead>
+                                <tr class="bg-light text-center">
+                                    <th rowspan="2" style="width: 20px;">#</th>
+                                    <th rowspan="2" style="min-width: 150px;">Auditor (Alternatif)</th>
+
+                                    <th th:each="c : ${criteriaList}"
+                                        th:colspan="${#lists.size(c.subCriteriaList)}"
+                                        class="text-center text-dark"
+                                        th:text="${c.code} + ' (' + ${c.indeks} + ')'">
+                                        Kriteria C1 (BENEFIT)
+                                    </th>
+                                </tr>
+
+                                <tr class="text-center">
+                                    <th th:each="sc : ${allSubCriteria}"
+                                        th:text="${sc.code}"
+                                        style="min-width: 80px;">
+                                        C1.1
+                                    </th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr th:each="auditor, status : ${auditors}">
+                                    <td th:text="${status.count}">1</td>
+                                    <td th:text="${auditor.name}">Nama Auditor A</td>
+
+                                    <th:block th:each="sc : ${allSubCriteria}">
+                                        <td class="text-center">
+                                            <th:block th:with="scoreKey=${auditor.id + '_' + sc.id},
+                                                                    scoreEntity=${normalizedScoreMap.get(scoreKey)}">
+
+                                                    <span th:if="${scoreEntity != null and scoreEntity.normalizedValue != null}"
+                                                          th:text="${#numbers.formatDecimal(scoreEntity.normalizedValue, 1, 4)}"
+                                                    >0.7500</span>
+
+                                                <span th:unless="${scoreEntity != null and scoreEntity.normalizedValue != null}" class="text-muted">
+                                                        0.0000
+                                                    </span>
+                                            </th:block>
+                                        </td>
+                                    </th:block>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a th:href="@{/calculation/ranking}" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Lanjut ke Matriks Pembobotan (V)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+</body>
+
+</html>
