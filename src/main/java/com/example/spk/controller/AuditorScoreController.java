@@ -1,5 +1,6 @@
 package com.example.spk.controller;
 
+import com.example.spk.entity.Crips;
 import com.example.spk.entity.Criteria;
 import com.example.spk.entity.AuditorScore;
 import com.example.spk.repository.AuditorRepository; // BARU: Tambahkan import
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +57,10 @@ public class AuditorScoreController {
 
         // 3. Mengambil Crips untuk dropdown (diperlukan saat update diimplementasikan)
         model.addAttribute("allCrips", cripsRepository.findAll());
+//        List<Crips> listCrips = cripsRepository.findAll();
+//        listCrips.forEach(crips -> {
+//            crips.getSubCriteria().get
+//        });
 
         if (isGenerated) {
             // Panggil method service yang benar (Perbaikan 4)
@@ -88,24 +94,73 @@ public class AuditorScoreController {
 
     // Tambahkan method @PostMapping("/update") jika Anda mengimplementasikan update AJAX.
     @PostMapping("/update-row")
-    public String updateScoreRow(
-            @RequestParam Long auditorId,
-            @RequestParam Long criteriaId,
-            // Gunakan Map<String, String> jika Anda tidak yakin bagaimana Spring me-bind type
-            // Jika Anda yakin Spring bisa mengikatnya, gunakan Map<String, Double> (tapi rawan error)
-            @RequestParam Map<String, String> allParams, // Ganti tipe data menjadi String untuk menerima _csrf
-            RedirectAttributes ra)
-    {
+    public String updateAuditorRowScores(
+            @RequestParam("auditorId") Long auditorId,
+            @RequestParam("criteriaId") Long criteriaId,
+            @RequestParam Map<String, String> cripsIds, // Mengambil Map<scoreId, cripsId>
+            @RequestParam Map<String, String> scoreIds, // Mengambil semua hidden field scoreIds[...]
+            RedirectAttributes redirectAttributes) {
+
         try {
-            // Panggil service untuk memproses pembaruan Map ini
-            // Kita meneruskan semua parameter dan biarkan Service yang memfilter dan mengkonversi
-            scoreService.updateScoresFromMap(allParams);
-            ra.addFlashAttribute("successMessage", "Nilai auditor " + auditorId + " berhasil diperbarui!");
+            Map<Long, Long> scoresToUpdate = new HashMap<>();
+
+            // Iterasi melalui ID skor yang lama (hidden field scoreIds[...])
+            scoreIds.entrySet().stream()
+                    .filter(entry -> entry.getKey().startsWith("scoreIds["))
+                    .forEach(entry -> {
+                        try {
+                            // Nilai dari hidden field adalah Score ID (e.g., "123")
+                            Long scoreId = Long.parseLong(entry.getValue());
+
+                            // Dapatkan key Crips yang sesuai (e.g., "cripsIds[123]")
+                            String cripsKey = "cripsIds[" + scoreId + "]";
+                            String newCripsIdString = cripsIds.get(cripsKey);
+
+                            if (newCripsIdString != null && !newCripsIdString.isEmpty()) {
+                                // Lakukan konversi String ke Long secara eksplisit
+                                Long newCripsId = Long.parseLong(newCripsIdString);
+
+                                // Map<AlternativeScoreId, NewCripsId>
+                                scoresToUpdate.put(scoreId, newCripsId);
+                            }
+                            // Jika newCripsIdString kosong, itu berarti opsi "-- Pilih Nilai --" terpilih.
+
+                        } catch (NumberFormatException e) {
+                            System.err.println("Error parsing ID dalam loop update: " + e.getMessage());
+                        }
+                    });
+
+            // Panggil Service Layer
+            scoreService.updateScoresByCripsId(scoresToUpdate);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Penilaian Auditor " + auditorId + " berhasil diperbarui.");
+
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Gagal update: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Gagal mengupdate skor: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Gagal mengupdate skor: " + e.getMessage());
         }
 
+        // Redirect kembali ke halaman yang sama (penilaian kriteria yang sedang aktif)
         return "redirect:/auditor-scores/" + criteriaId;
     }
+//    @PostMapping("/update-row")
+//    public String updateScoreRow(
+//            @RequestParam Long auditorId,
+//            @RequestParam Long criteriaId,
+//            // Gunakan Map<String, String> jika Anda tidak yakin bagaimana Spring me-bind type
+//            // Jika Anda yakin Spring bisa mengikatnya, gunakan Map<String, Double> (tapi rawan error)
+//            @RequestParam Map<String, String> allParams, // Ganti tipe data menjadi String untuk menerima _csrf
+//            RedirectAttributes ra)
+//    {
+//        try {
+//            // Panggil service untuk memproses pembaruan Map ini
+//            // Kita meneruskan semua parameter dan biarkan Service yang memfilter dan mengkonversi
+//            scoreService.updateScoresFromMap(allParams);
+//            ra.addFlashAttribute("successMessage", "Nilai auditor " + auditorId + " berhasil diperbarui!");
+//        } catch (Exception e) {
+//            ra.addFlashAttribute("errorMessage", "Gagal update: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        return "redirect:/auditor-scores/" + criteriaId;
+//    }
 }

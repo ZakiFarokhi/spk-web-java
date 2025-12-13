@@ -36,7 +36,8 @@ public class SecurityConfig {
         http
 //        .csrf().disable() // development only
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/img/**", "/plugins/**", "/login", "/register", "/error").permitAll()
+                        // TAMBAHKAN /assets/** DI SINI jika gambar Anda ada di folder itu
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/plugins/**", "/assets/**", "/login", "/register", "/error").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

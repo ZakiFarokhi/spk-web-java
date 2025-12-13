@@ -103,16 +103,26 @@
                                                             <input type="hidden" th:name="'scoreIds[' + ${currentScore.id} + ']'"
                                                                    th:value="${currentScore.id}" />
 
-                                                            <div class="input-group input-group-sm">
-                                                                <input type="number" min="0" max="5" step="0.5" class="form-control"
-                                                                       placeholder="Nilai" th:name="'rawValues[' + ${currentScore.id} + ']'"
-                                                                       th:value="${#numbers.formatDecimal(currentScore.rawValue, 1, 2)}" required />
-                                                                <span th:if="${currentScore.crips != null}"
-                                                                      class="input-group-text badge bg-success" th:text="${currentScore.crips.code}"
-                                                                      style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-																			K1
-																		</span>
-                                                            </div>
+                                                            <select class="form-control form-control-sm"
+                                                                    th:name="'cripsIds[' + ${currentScore.id} + ']'"
+                                                                    required style="min-width: 120px; display: inline-block;">
+
+                                                                <option value="">-- Pilih Nilai --</option>
+
+                                                                <th:block th:each="crips : ${allCrips}">
+                                                                    <th:block th:if="${crips.subCriteria.id == sc.id}">
+<!--                                                                        <option th:value="${crips.id}" th:text="${crips.description}">test</option>-->
+
+                                                                        <option th:value="${crips.id}"
+                                                                                th:text="${crips.description} + ' (' + ${#numbers.formatDecimal(crips.nilai, 1, 2)} + ')'"
+                                                                                th:selected="${currentScore != null and currentScore.crips != null and currentScore.crips.id == crips.id}">
+                                                                            Crips Description (Value)
+                                                                        </option>
+                                                                    </th:block>
+
+                                                                </th:block>
+
+                                                            </select>
 
                                                         </th:block>
                                                     </td>

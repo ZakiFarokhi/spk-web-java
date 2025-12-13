@@ -1,9 +1,6 @@
 package com.example.spk.service;
 
-import com.example.spk.entity.Auditor;
-import com.example.spk.entity.AuditorScore;
-import com.example.spk.entity.Criteria;
-import com.example.spk.entity.SubCriteria;
+import com.example.spk.entity.*;
 import com.example.spk.repository.AuditorScoreRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,6 +238,33 @@ public class AuditorScoreService {
 
         } else {
             System.out.println("Tipe indeks kriteria tidak dikenal: " + criteriaIndeks);
+        }
+    }
+
+    @Transactional
+    public void updateScoresByCripsId(Map<Long, Long> scoresToUpdate) {
+
+        for (Map.Entry<Long, Long> entry : scoresToUpdate.entrySet()) {
+            Long scoreId = entry.getKey();      // ID dari AlternativeScore yang sudah ada
+            Long newCripsId = entry.getValue(); // ID dari Crips yang baru dipilih
+
+            // 1. Ambil AlternativeScore yang akan diupdate
+            AuditorScore score = auditorScoreRepository.findById(scoreId)
+                    .orElseThrow(() -> new IllegalArgumentException("AlternativeScore tidak ditemukan dengan ID: " + scoreId));
+
+            // 2. Ambil objek Crips yang baru berdasarkan ID yang dipilih
+            Crips newCrips = cripsService.findById(newCripsId)
+                    .orElseThrow(() -> new IllegalArgumentException("Crips tidak ditemukan dengan ID: " + newCripsId));
+
+            // 3. Update relasi Crips
+            score.setCrips(newCrips);
+
+            // 4. Update rawValue
+            // Ini PENTING untuk sinkronisasi: rawValue harus sama dengan nilai Crips yang baru dipilih.
+            score.setRawValue(newCrips.getNilai());
+
+            // 5. Simpan perubahan (akan melakukan UPDATE)
+            auditorScoreRepository.save(score);
         }
     }
 

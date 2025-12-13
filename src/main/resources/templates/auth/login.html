@@ -6,15 +6,19 @@
     <title>Login</title>
     <link rel="stylesheet" th:href="@{/plugins/fontawesome-free/css/all.min.css}" />
     <link rel="stylesheet" th:href="@{/css/adminlte.min.css}" />
+    <style th:replace="~{/shared/style}"></style>
 </head>
-<body class="hold-transition login-page">
+<body class="hold-transition login-page full-page-bg">
+
 <div class="login-box">
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <a href="#" class="h1"><b>Admin</b>LTE</a>
+            <a href="#" class="h2">Penilaian Auditor</a>
+            <a href="#" class="h2">P2UPD Inspektorat <br></a>
+            <a href="#" class="h2">DKI Jakarta</a>
         </div>
         <div class="card-body">
-            <p class="login-box-msg">Sign in to start your session</p>
+            <p class="login-box-msg">Sign in to start your session </p>
 
             <form th:action="@{/login}" method="post">
                 <div class="input-group mb-3">
@@ -39,7 +43,6 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             </form>
 
-            <p class="mb-1"><a th:href="@{/register}">Register a new membership</a></p>
         </div>
     </div>
 </div>

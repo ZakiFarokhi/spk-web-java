@@ -21,10 +21,27 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet"
           type="text/css">
     <style>
-        .bg-custom {
-            background: url('/assets/img/background/balkot.png') no-repeat center center fixed;
-            background-size: cover;
-        }
+        .content-wrapper.bg-custom {
+    /* 1. Tentukan path gambar Anda */
+    /* PASTIKAN PATH INI BENAR! Contoh: src/main/resources/static/images/my-background.jpg */
+    background-image: url('/assets/img/background/bg-jakarta.jpg');
+
+    /* 2. Hindari Pengulangan */
+    background-repeat: no-repeat;
+
+    /* 3. Atur Ukuran agar Mencakup Seluruh Ruang */
+    /* 'cover' memastikan gambar mengisi penuh area content-wrapper */
+    background-size: cover;
+
+    /* 4. Posisikan di Tengah */
+    background-position: center center;
+
+    /* 5. (Opsional) Membuat Gambar Tetap Saat Scroll (Parallax effect) */
+    /* background-attachment: fixed; */
+
+    /* 6. (Opsional) Berikan Warna Fallback (Jika gambar gagal dimuat) */
+    background-color: #f0f0f0;
+}
     </style>
 </head>
 <body class="hold-transition login-page bg-custom">
@@ -42,7 +59,7 @@
                 You have been logged out.
             </p>
 
-            <p class="login-box-msg">Sign in to start your session</p>
+            <p class="login-box-msg">Sign in to start your sessions</p>
 
             <form method="post" th:action="@{~/login}">
                 <div class="input-group mb-3">
