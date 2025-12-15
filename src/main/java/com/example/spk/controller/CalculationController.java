@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class CalculationController {
      * URL: /calculation/normalization
      */
     @GetMapping("/normalization")
-    public String showNormalizationMatrix(Model model) {
+    public String showNormalizationMatrix(Model model, Principal principal) {
 
         // 1. Ambil semua data dasar
         List<Auditor> auditors = auditorService.findAll();
@@ -46,6 +47,7 @@ public class CalculationController {
                 .flatMap(c -> c.getSubCriteriaList().stream())
                 .collect(Collectors.toList());
 
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("criterias", criteriaService.findAll());
         model.addAttribute("auditors", auditors);
         model.addAttribute("criteriaList", criteriaList);
@@ -56,7 +58,7 @@ public class CalculationController {
     }
 
     @GetMapping("/aggregated")
-    public String showAggregatedNormalizationMatrix(Model model) {
+    public String showAggregatedNormalizationMatrix(Model model, Principal principal) {
 
         List<Auditor> auditors = auditorService.findAll();
         List<Criteria> criteriaList = criteriaService.findAll(); // Hanya Kriteria Utama
@@ -64,6 +66,7 @@ public class CalculationController {
         // Hitung Matriks R_c (Hasil Aggregasi)
         Map<String, Double> aggregatedScoreMap = calculationService.calculateAggregatedNormalizationMatrix();
 
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("criterias", criteriaList);
         model.addAttribute("auditors", auditors);
         model.addAttribute("criteriaList", criteriaList);
@@ -73,7 +76,7 @@ public class CalculationController {
     }
 
     @GetMapping("/final_normalized")
-    public String showFinalNormalizedMatrix(Model model) {
+    public String showFinalNormalizedMatrix(Model model,  Principal principal) {
 
         List<Auditor> auditors = auditorService.findAll();
         List<Criteria> criteriaList = criteriaService.findAll();
@@ -81,6 +84,7 @@ public class CalculationController {
         // Hitung Matriks R_Final (Hasil Aggregasi + Normalisasi Akhir)
         Map<String, Double> finalNormalizedScoreMap = calculationService.calculateFinalNormalizedCriteriaMatrix();
 
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("criterias", criteriaList);
         model.addAttribute("auditors", auditors);
         model.addAttribute("criteriaList", criteriaList);
@@ -90,10 +94,11 @@ public class CalculationController {
     }
 
     @GetMapping("/ranking")
-    public String showAndGenerateRanking(Model model) {
+    public String showAndGenerateRanking(Model model, Principal principal) {
 
         // 1. Ambil Data Dasar untuk header dan tampilan (Kriteria)
         List<Criteria> criteriaList = criteriaService.findAll();
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("criteriaList", criteriaList);
         model.addAttribute("criterias", criteriaList);
 
@@ -116,25 +121,5 @@ public class CalculationController {
 
         return "calculation/ranking_result"; // Nama file Thymeleaf Anda
     }
-
-    /**
-     * Memicu perhitungan ranking akhir (POST).
-     * URL: /calculation/ranking/generate
-     */
-    @PostMapping("/ranking/generate")
-    public String generateRanking(RedirectAttributes redirectAttributes) {
-
-        // PENTING: Lakukan perhitungan skor akhir di service
-        List<RankingResult> results = calculationService.calculateFinalRanking();
-
-        // Kirim hasil perhitungan melalui redirect attributes
-        // (Flash Attributes agar data tidak hilang setelah redirect)
-        redirectAttributes.addFlashAttribute("rankingResults", results);
-        redirectAttributes.addFlashAttribute("calculationSuccess", true);
-
-        // Redirect kembali ke halaman GET /ranking untuk menampilkan hasil
-        return "redirect:/calculation/ranking";
-    }
-
 
 }
