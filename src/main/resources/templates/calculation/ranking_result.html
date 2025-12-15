@@ -3,7 +3,6 @@
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <!--    <title th:text="'Penilaian Kriteria: ' + ${criteria.name}"></title>-->
     <style>
         table.table-hover tbody tr:hover {
             background-color: #f7f7f7;
@@ -39,19 +38,15 @@
                     </div>
 
                     <div class="card-body">
-                        <div th:if="${#lists.isEmpty(rankingResults)}">
-                            <p class="alert alert-warning">
-                                Data ranking belum dihitung. Silakan klik tombol di bawah untuk memulai perhitungan Skor Preferensi ($V_i$).
-                            </p>
 
-                            <form th:action="@{/calculation/ranking/generate}" method="post">
-                                <button type="submit" class="btn btn-lg btn-success">
-                                    <i class="fas fa-play"></i> Generate Ranking Auditor
-                                </button>
-                            </form>
+                        <div th:if="${#lists.isEmpty(rankingResults)}">
+                            <p class="alert alert-info">
+                                Tidak ada data auditor yang tersedia untuk perhitungan ranking.
+                            </p>
                         </div>
 
                         <div th:if="${!#lists.isEmpty(rankingResults)}">
+
                             <div th:if="${calculationSuccess}" class="alert alert-success">
                                 ✅ Perhitungan ranking berhasil diselesaikan!
                             </div>
@@ -86,16 +81,8 @@
                                 </table>
                             </div>
                         </div>
-
                     </div>
 
-                    <div class="card-footer" th:if="${!#lists.isEmpty(rankingResults)}">
-                        <form th:action="@{/calculation/ranking/generate}" method="post">
-                            <button type="submit" class="btn btn-secondary">
-                                <i class="fas fa-sync-alt"></i> Hitung Ulang Ranking
-                            </button>
-                        </form>
-                    </div>
                 </div>
             </div>
         </section>

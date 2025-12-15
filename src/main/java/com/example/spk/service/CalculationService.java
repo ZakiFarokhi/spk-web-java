@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,34 +34,44 @@ public class CalculationService {
      */
     @Transactional(readOnly = true)
     public List<RankingResult> calculateFinalRanking() {
-        //
 
-        // 1. Ambil semua Auditor
+        // 1. Ambil Auditor
         List<Auditor> auditors = auditorRepository.findAll();
 
-        // 2. Ambil semua skor auditor yang sudah dinormalisasi
-        List<AuditorScore> allScores = auditorScoreRepository.findAll();
+        // 2. Mendapatkan Matriks Keputusan Ternormalisasi Akhir (R_ij)
+        //    Input dari fungsi normalisasi kriteria sebelumnya.
+        Map<String, Double> finalNormalizedMatrix = this.calculateFinalNormalizedCriteriaMatrix();
 
-        // 3. Kelompokkan skor berdasarkan Auditor
-        Map<Auditor, List<AuditorScore>> scoresByAuditor = allScores.stream()
-                .collect(Collectors.groupingBy(AuditorScore::getAuditor));
+        // 3. Ambil Bobot Kriteria Utama (W_j)
+        List<Criteria> criteriaList = criteriaRepository.findAll();
+        Map<Long, Double> criteriaWeights = criteriaList.stream()
+                .collect(Collectors.toMap(
+                        Criteria::getId,
+                        criteria -> criteria.getBobot() != null ? criteria.getBobot() : 0.0
+                ));
 
-        // 4. Hitung Skor Preferensi (V) untuk setiap Auditor
+        // 4. Hitung Skor Preferensi Akhir (Final Score) per Auditor
         List<RankingResult> rankingResults = auditors.stream()
                 .map(auditor -> {
-                    List<AuditorScore> auditorScores = scoresByAuditor.getOrDefault(auditor, List.of());
                     double finalScore = 0.0;
 
-                    for (AuditorScore score : auditorScores) {
-                        // Pastikan normalizedValue dan bobot kriteria sudah ada
-                        Double normalizedValue = score.getNormalizedValue() != null ? score.getNormalizedValue() : 0.0;
+                    // Iterasi melalui semua Kriteria Utama
+                    for (Criteria criteria : criteriaList) {
 
-                        // Kriteria bobot harus diakses melalui entitas Criteria yang terkait dengan skor
-                        Double weight = score.getCriteria() != null ? score.getCriteria().getBobot() : 0.0;
+                        String key = auditor.getId() + "_" + criteria.getId();
 
-                        // Perhitungan Matriks V (V_ij = W_j * r_ij) dan Penjumlahan
-                        finalScore += weight * normalizedValue;
+                        // A. Ambil Matriks Ternormalisasi (R_ij)
+                        Double normalizedScore = finalNormalizedMatrix.getOrDefault(key, 0.0);
+
+                        // B. Ambil Bobot Kriteria Utama (W_j)
+                        Double weight = criteriaWeights.getOrDefault(criteria.getId(), 0.0);
+
+                        // C. Perkalian dan Agregasi
+                        double weightedContribution = normalizedScore * weight;
+                        finalScore += weightedContribution;
+
                     }
+
 
                     return new RankingResult(auditor, finalScore);
                 })
@@ -68,6 +79,21 @@ public class CalculationService {
 
         // 5. Urutkan Ranking (Skor tertinggi adalah peringkat 1)
         rankingResults.sort(Comparator.comparingDouble(RankingResult::getFinalScore).reversed());
+
+        // Logging hasil akhir
+        System.out.println("\n---------------------------------------------------------");
+        System.out.println("               FINAL RANKING ORDER (V_i)               ");
+        System.out.println("---------------------------------------------------------");
+        for (int i = 0; i < rankingResults.size(); i++) {
+            RankingResult result = rankingResults.get(i);
+            System.out.printf("Rank %d: %s (ID: %d) -> Score: %.6f\n",
+                    i + 1,
+                    result.getAuditor().getName(),
+                    result.getAuditor().getId(),
+                    result.getFinalScore()
+            );
+        }
+        System.out.println("=======================================================");
 
         return rankingResults;
     }
@@ -93,11 +119,10 @@ public class CalculationService {
     @Transactional(readOnly = true)
     public Map<String, Double> calculateAggregatedNormalizationMatrix() {
 
-        // 1. Ambil semua skor normalisasi
+        // 1. Ambil semua skor
         List<AuditorScore> allScores = auditorScoreRepository.findAll();
 
-        // 2. Kelompokkan skor berdasarkan Auditor dan Kriteria (untuk iterasi)
-        // Key: Auditor, Value: Map<Criteria, List<AuditorScore>>
+        // 2. Kelompokkan skor berdasarkan Auditor dan Kriteria
         Map<Auditor, Map<Criteria, List<AuditorScore>>> groupedScores = allScores.stream()
                 .collect(Collectors.groupingBy(
                         AuditorScore::getAuditor,
@@ -106,69 +131,85 @@ public class CalculationService {
 
         Map<String, Double> aggregatedMap = new HashMap<>();
 
-        // 3. Iterasi dan Aggregasi
+        // 3. Iterasi dan Aggregasi (Hitung C_j,norm menggunakan normalized_value)
         for (Map.Entry<Auditor, Map<Criteria, List<AuditorScore>>> entryAuditor : groupedScores.entrySet()) {
             Auditor auditor = entryAuditor.getKey();
 
             for (Map.Entry<Criteria, List<AuditorScore>> entryCriteria : entryAuditor.getValue().entrySet()) {
+                // Kita tidak perlu lagi membalik C3 di sini, karena diasumsikan
+                // kolom normalized_value sudah mencerminkan nilai yang benar untuk C3.
+
                 Criteria criteria = entryCriteria.getKey();
                 List<AuditorScore> subScores = entryCriteria.getValue();
 
-                // Perhitungan Aggregasi
-                double totalAggregatedScore = 0.0;
-
-                // Asumsi Sederhana: Bobot Sub-Kriteria dianggap sama (Rata-rata sederhana)
-                // Jika Sub-Kriteria memiliki bobot berbeda, ganti 1.0/subScores.size() dengan bobot Sub-Kriteria (W_sk)
-                double subWeight = 1.0 / subScores.size();
+                double aggregatedScore = 0.0;
 
                 for (AuditorScore score : subScores) {
+                    // PENTING: Menggunakan nilai yang sudah dinormalisasi dari database
                     Double normalizedValue = score.getNormalizedValue() != null ? score.getNormalizedValue() : 0.0;
 
-                    // Aggregasi: (Bobot Sub-Kriteria * Nilai Normalisasi Sub-Kriteria)
-                    totalAggregatedScore += subWeight * normalizedValue;
+                    // Ambil Bobot Sub-Kriteria (W_sk)
+                    Double subWeight = score.getSubCriteria() != null && score.getSubCriteria().getBobot() != null
+                            ? score.getSubCriteria().getBobot()
+                            : 0.0;
+
+                    // Agregasi: C_j,norm += (Normalized Value * Sub-Weight)
+                    aggregatedScore += normalizedValue * subWeight;
                 }
 
-                // Simpan hasil aggregasi (Matriks R_c)
+                // Simpan hasil aggregasi (Matriks C_j,norm)
+                // C_j,norm sekarang berada di rentang 0-1.
                 String key = auditor.getId() + "_" + criteria.getId();
-                aggregatedMap.put(key, totalAggregatedScore);
+                aggregatedMap.put(key, aggregatedScore);
             }
         }
 
-        return aggregatedMap;
+        return aggregatedMap; // Map berisi skor C_j,norm (rentang 0-1) per Auditor
     }
 
     @Transactional(readOnly = true)
     public Map<String, Double> calculateFinalNormalizedCriteriaMatrix() {
 
-        // Ambil Matriks hasil aggregasi dari Step 2
-        Map<String, Double> aggregatedMap = calculateAggregatedNormalizationMatrix();
+        // 1. Ambil Matriks hasil aggregasi dari Sub-Kriteria (C_j,norm)
+        Map<String, Double> aggregatedMap = this.calculateAggregatedNormalizationMatrix();
 
-        // 1. Kelompokkan berdasarkan Kriteria (untuk mencari Max per Kriteria)
+        // 2. Kelompokkan berdasarkan Kriteria (untuk mencari Max per Kriteria)
         Map<Long, List<Double>> scoresByCriteriaId = new HashMap<>();
+
+        // Inisialisasi Kriteria ID 3 (C3)
+        final Long CRITERIA_ID_C3 = 3L;
 
         for (Map.Entry<String, Double> entry : aggregatedMap.entrySet()) {
             String key = entry.getKey(); // Format: "AuditorId_CriteriaId"
 
-            // Ekstraksi CriteriaId
-            Long criteriaId = Long.parseLong(key.split("_")[1]);
+            String[] parts = key.split("_");
+            if (parts.length < 2) continue;
+            Long criteriaId = Long.parseLong(parts[1]);
 
             scoresByCriteriaId.computeIfAbsent(criteriaId, k -> new ArrayList<>()).add(entry.getValue());
         }
 
-        // 2. Hitung Nilai Maksimum (Max) per Kriteria
+        // 3. Hitung Nilai Maksimum (Max) per Kriteria
         Map<Long, Double> maxPerCriteria = scoresByCriteriaId.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().stream().mapToDouble(Double::doubleValue).max().orElse(1.0)
                 ));
 
-        // 3. Normalisasi Akhir (r = x / max)
+        // Ambil Max Global untuk C3
+        Double maxC3 = maxPerCriteria.getOrDefault(CRITERIA_ID_C3, 1.0);
+
+
+        // 4. Normalisasi Pembagian Maksimum (r = x / max)
         Map<String, Double> finalNormalizedMap = new HashMap<>();
 
         for (Map.Entry<String, Double> entry : aggregatedMap.entrySet()) {
             String key = entry.getKey();
-            Double aggregatedScore = entry.getValue();
-            Long criteriaId = Long.parseLong(key.split("_")[1]);
+            Double aggregatedScore = entry.getValue(); // Skor C_j,norm
+
+            String[] parts = key.split("_");
+            if (parts.length < 2) continue;
+            Long criteriaId = Long.parseLong(parts[1]);
 
             Double maxValue = maxPerCriteria.getOrDefault(criteriaId, 1.0);
 

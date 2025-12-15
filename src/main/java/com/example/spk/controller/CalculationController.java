@@ -90,16 +90,28 @@ public class CalculationController {
     }
 
     @GetMapping("/ranking")
-    public String showRanking(Model model) {
+    public String showAndGenerateRanking(Model model) {
 
-        // Data dasar untuk header dan tampilan
+        // 1. Ambil Data Dasar untuk header dan tampilan (Kriteria)
         List<Criteria> criteriaList = criteriaService.findAll();
         model.addAttribute("criteriaList", criteriaList);
         model.addAttribute("criterias", criteriaList);
-        // Cek apakah hasil ranking sudah ada di model (setelah redirect dari POST)
-        if (!model.containsAttribute("rankingResults")) {
-            // Jika tidak ada hasil (pertama kali akses), inisialisasi list kosong
+
+        // 2. Memicu Perhitungan Ranking
+        // PENTING: Panggil service untuk mendapatkan hasil ranking terbaru
+        try {
+            List<RankingResult> rankingResults = calculationService.calculateFinalRanking();
+
+            // 3. Tambahkan Hasil ke Model
+            model.addAttribute("rankingResults", rankingResults);
+            model.addAttribute("calculationSuccess", true); // Opsional: Indikator sukses
+
+        } catch (Exception e) {
+            // Tangani error jika perhitungan gagal
             model.addAttribute("rankingResults", List.of());
+            model.addAttribute("calculationError", "Gagal menghitung ranking: " + e.getMessage());
+            // Log error untuk debugging
+            // logger.error("Ranking calculation failed", e);
         }
 
         return "calculation/ranking_result"; // Nama file Thymeleaf Anda

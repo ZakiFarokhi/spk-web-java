@@ -79,7 +79,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C1");
                         c.setName("Pendidikan");
-                        c.setBobot(0.05);
+                        c.setBobot(0.15);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
@@ -89,7 +89,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C2");
                         c.setName("Hasil Kerja");
-                        c.setBobot(0.30);
+                        c.setBobot(0.20);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
@@ -99,7 +99,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C3");
                         c.setName("Perilaku Kerja");
-                        c.setBobot(0.25);
+                        c.setBobot(0.20);
                         c.setIndeks("COST");
                         return criteriaRepository.save(c);
                     });
@@ -109,7 +109,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C4");
                         c.setName("Kompetensi");
-                        c.setBobot(0.20);
+                        c.setBobot(0.15);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
@@ -119,7 +119,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C5");
                         c.setName("SKP");
-                        c.setBobot(0.04);
+                        c.setBobot(0.10);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
@@ -129,7 +129,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C6");
                         c.setName("Angka Kredit");
-                        c.setBobot(0.04);
+                        c.setBobot(0.10);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
@@ -139,7 +139,7 @@ public class DataInitializer {
                         Criteria c = new Criteria();
                         c.setCode("C7");
                         c.setName("Penilaian Atasan");
-                        c.setBobot(0.12);
+                        c.setBobot(0.10);
                         c.setIndeks("BENEFIT");
                         return criteriaRepository.save(c);
                     });
