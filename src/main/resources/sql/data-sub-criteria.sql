@@ -1,10 +1,7 @@
 INSERT INTO sub_criteria (code, criteria_id, name, bobot) VALUES
 -- C1 PENDIDIKAN
-('C1.1', 1, 'SMA', 1.000),
-('C1.2', 1, 'D3', 1.000),
-('C1.3', 1, 'S1/DIV', 1.000),
-('C1.4', 1, 'S2', 1.000),
-('C1.5', 1, 'S3', 1.000),
+('C1.1', 1, 'Pendidikan Formal', 0.4),
+('C1.2', 1, 'Pendidikan Kauditoran (CIA,CPA,QIA,CISA)', 0.6),
 
 -- C2 HASIL KERJA
 ('C2.1', 2, 'ST', 0.150),
@@ -29,22 +26,15 @@ INSERT INTO sub_criteria (code, criteria_id, name, bobot) VALUES
 ('C4.6', 4, 'Kerjasama Tim', 0.140),
 
 -- C5 SKP
-('C5.1', 5, 'Sangat Baik', 1.000),
-('C5.2', 5, 'Baik', 1.000),
-('C5.3', 5, 'Cukup', 1.000),
-('C5.4', 5, 'Kurang', 1.000),
-('C5.5', 5, 'Sangat Kurang', 1.000),
+('C5.1', 5, 'Kinerja Utama', 0.65),
+('C5.2', 5, 'Pengawasan', 0.35),
 
 -- C6 ANGKA KREDIT
-('C6.1', 6, 'Sangat Baik', 1.000),
-('C6.2', 6, 'Baik', 1.000),
-('C6.3', 6, 'Cukup', 1.000),
-('C6.4', 6, 'Kurang', 1.000),
-('C6.5', 6, 'Sangat Kurang', 1.000),
+('C6.1', 6, 'Pengawasan', 0.3),
+('C6.2', 6, 'Pengembangan Profesi', 0.35),
+('C6.3', 6, 'Pengembangan Diri', 0.35),
 
 -- C7 PENILAIAN ATASAN
-('C7.1', 7, 'Kinerja Terbaik', 1.000),
-('C7.2', 7, 'Baik', 1.000),
-('C7.3', 7, 'Kinerja Cukup', 1.000),
-('C7.4', 7, 'Kinerja Kurang', 1.000),
-('C7.5', 7, 'Kinerja Sangat Kurang', 1.000);
+('C7.1', 7, 'Kompetensi', 0.35),
+('C7.2', 7, 'Perilaku Kerja', 0.3),
+('C7.3', 7, 'Kualitas Kerja', 0.35);

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{/layout}" > <head>
+    <title th:text="${statusCode} + ' Error'"></title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 th:text="${statusCode}">500 Error</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="error-page">
+            <h2 class="headline text-danger" th:classappend="'text-' + (${statusCode == 404 ? 'warning' : 'danger'})" th:text="${statusCode}"> 500</h2>
+
+            <div class="error-content">
+                <h3 th:text="${errorMessage}"><i class="fas fa-exclamation-triangle text-danger"></i> Oops! Something went wrong.</h3>
+
+                <p th:text="${errorDescription}">
+                    Terjadi kesalahan pada server saat memproses permintaan Anda. Silakan coba lagi nanti.
+                </p>
+
+                <div class="mt-3">
+                    <a th:href="@{/dashboard}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 package com.example.spk.controller;
 
 import com.example.spk.entity.Auditor;
-import com.example.spk.entity.User;
 import com.example.spk.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

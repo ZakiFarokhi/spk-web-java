@@ -97,45 +97,45 @@ public class AuditorScoreService {
      * Memproses semua parameter dari form update per baris,
      * memfilter CSRF, dan menyimpan nilai mentah yang baru.
      */
-    @Transactional
-    public void updateScoresFromMap(Map<String, String> allParams) {
-        Long lastCriteriaId = null;
-
-        for (Map.Entry<String, String> entry : allParams.entrySet()) {
-            String key = entry.getKey();
-            String rawValueStr = entry.getValue();
-
-            Matcher matcher = RAW_VALUE_PATTERN.matcher(key);
-
-            if (matcher.matches()) {
-                Long scoreId = Long.parseLong(matcher.group(1));
-                Double newRawValue;
-
-                try {
-                    newRawValue = Double.parseDouble(rawValueStr.replace(',', '.'));
-                } catch (NumberFormatException e) {
-                    throw new RuntimeException("Nilai tidak valid untuk skor ID " + scoreId + ": " + rawValueStr, e);
-                }
-
-                AuditorScore score = auditorScoreRepository.findById(scoreId)
-                        .orElseThrow(() -> new RuntimeException("Skor ID " + scoreId + " tidak ditemukan."));
-
-                // 1. Update Raw Value
-                score.setRawValue(newRawValue);
-                // 2. Clear Normalized Value (siap dihitung ulang)
-                score.setNormalizedValue(null);
-                // 3. Simpan ID Kriteria untuk pemicu normalisasi
-                lastCriteriaId = score.getCriteria().getId();
-
-                auditorScoreRepository.save(score);
-            }
-        }
-
-        // Pemicu Perhitungan Normalisasi setelah semua update selesai
-        if (lastCriteriaId != null) {
-            this.recalculateNormalization(lastCriteriaId);
-        }
-    }
+//    @Transactional
+//    public void updateScoresFromMap(Map<String, String> allParams) {
+//        Long lastCriteriaId = null;
+//
+//        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+//            String key = entry.getKey();
+//            String rawValueStr = entry.getValue();
+//
+//            Matcher matcher = RAW_VALUE_PATTERN.matcher(key);
+//
+//            if (matcher.matches()) {
+//                Long scoreId = Long.parseLong(matcher.group(1));
+//                Double newRawValue;
+//
+//                try {
+//                    newRawValue = Double.parseDouble(rawValueStr.replace(',', '.'));
+//                } catch (NumberFormatException e) {
+//                    throw new RuntimeException("Nilai tidak valid untuk skor ID " + scoreId + ": " + rawValueStr, e);
+//                }
+//
+//                AuditorScore score = auditorScoreRepository.findById(scoreId)
+//                        .orElseThrow(() -> new RuntimeException("Skor ID " + scoreId + " tidak ditemukan."));
+//
+//                // 1. Update Raw Value
+//                score.setRawValue(newRawValue);
+//                // 2. Clear Normalized Value (siap dihitung ulang)
+//                score.setNormalizedValue(null);
+//                // 3. Simpan ID Kriteria untuk pemicu normalisasi
+//                lastCriteriaId = score.getCriteria().getId();
+//
+//                auditorScoreRepository.save(score);
+//            }
+//        }
+//
+//        // Pemicu Perhitungan Normalisasi setelah semua update selesai
+//        if (lastCriteriaId != null) {
+//            this.recalculateNormalization(lastCriteriaId);
+//        }
+//    }
 
 
     // ====================================================================
@@ -244,9 +244,12 @@ public class AuditorScoreService {
     @Transactional
     public void updateScoresByCripsId(Map<Long, Long> scoresToUpdate) {
 
+        // Inisialisasi variabel untuk melacak Kriteria yang diubah
+        Long lastCriteriaId = null;
+
         for (Map.Entry<Long, Long> entry : scoresToUpdate.entrySet()) {
-            Long scoreId = entry.getKey();      // ID dari AlternativeScore yang sudah ada
-            Long newCripsId = entry.getValue(); // ID dari Crips yang baru dipilih
+            Long scoreId = entry.getKey();
+            Long newCripsId = entry.getValue();
 
             // 1. Ambil AlternativeScore yang akan diupdate
             AuditorScore score = auditorScoreRepository.findById(scoreId)
@@ -259,12 +262,25 @@ public class AuditorScoreService {
             // 3. Update relasi Crips
             score.setCrips(newCrips);
 
-            // 4. Update rawValue
-            // Ini PENTING untuk sinkronisasi: rawValue harus sama dengan nilai Crips yang baru dipilih.
+            // 4. Update rawValue (PENTING)
             score.setRawValue(newCrips.getNilai());
 
-            // 5. Simpan perubahan (akan melakukan UPDATE)
+            // 5. Kosongkan Normalized Value (menandakan perlu dihitung ulang)
+            score.setNormalizedValue(null);
+
+            // 6. Simpan ID Kriteria sebelum menyimpan skor
+            if (score.getCriteria() != null) {
+                lastCriteriaId = score.getCriteria().getId();
+            }
+
+            // 7. Simpan perubahan
             auditorScoreRepository.save(score);
+        }
+
+        // Pemicu Perhitungan Normalisasi setelah semua update selesai
+        if (lastCriteriaId != null) {
+            System.out.println("NORMALIZATION TRIGGERED by Crips Update for Criteria ID: " + lastCriteriaId);
+            this.recalculateNormalization(lastCriteriaId);
         }
     }
 
