@@ -40,7 +40,7 @@ public class AuditorController {
     @PostMapping("/create")
     public String store(Auditor auditor) {
         auditorService.save(auditor);
-        return "redirect:/auditors";
+            return "redirect:/auditors";
     }
 
 

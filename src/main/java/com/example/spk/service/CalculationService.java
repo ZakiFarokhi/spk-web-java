@@ -31,90 +31,8 @@ public class CalculationService {
      * Menghitung Matriks Pembobotan (V) dan Skor Akhir (Preferensi) untuk semua Auditor.
      * Rumus SAW: V_i = Σ (W_j * r_ij)
      * * @return List hasil perhitungan peringkat
+     *
      */
-    @Transactional(readOnly = true)
-    public List<RankingResult> calculateFinalRanking() {
-
-        // 1. Ambil Auditor
-        List<Auditor> auditors = auditorRepository.findAll();
-
-        // 2. Mendapatkan Matriks Keputusan Ternormalisasi Akhir (R_ij)
-        //    Input dari fungsi normalisasi kriteria sebelumnya.
-        Map<String, Double> finalNormalizedMatrix = this.calculateFinalNormalizedCriteriaMatrix();
-
-        // 3. Ambil Bobot Kriteria Utama (W_j)
-        List<Criteria> criteriaList = criteriaRepository.findAll();
-        Map<Long, Double> criteriaWeights = criteriaList.stream()
-                .collect(Collectors.toMap(
-                        Criteria::getId,
-                        criteria -> criteria.getBobot() != null ? criteria.getBobot() : 0.0
-                ));
-
-        // 4. Hitung Skor Preferensi Akhir (Final Score) per Auditor
-        List<RankingResult> rankingResults = auditors.stream()
-                .map(auditor -> {
-                    double finalScore = 0.0;
-
-                    // Iterasi melalui semua Kriteria Utama
-                    for (Criteria criteria : criteriaList) {
-
-                        String key = auditor.getId() + "_" + criteria.getId();
-
-                        // A. Ambil Matriks Ternormalisasi (R_ij)
-                        Double normalizedScore = finalNormalizedMatrix.getOrDefault(key, 0.0);
-
-                        // B. Ambil Bobot Kriteria Utama (W_j)
-                        Double weight = criteriaWeights.getOrDefault(criteria.getId(), 0.0);
-
-                        // C. Perkalian dan Agregasi
-                        double weightedContribution = normalizedScore * weight;
-                        finalScore += weightedContribution;
-
-                    }
-
-
-                    return new RankingResult(auditor, finalScore);
-                })
-                .collect(Collectors.toList());
-
-        // 5. Urutkan Ranking (Skor tertinggi adalah peringkat 1)
-        rankingResults.sort(Comparator.comparingDouble(RankingResult::getFinalScore).reversed());
-
-        // Logging hasil akhir
-        System.out.println("\n---------------------------------------------------------");
-        System.out.println("               FINAL RANKING ORDER (V_i)               ");
-        System.out.println("---------------------------------------------------------");
-        for (int i = 0; i < rankingResults.size(); i++) {
-            RankingResult result = rankingResults.get(i);
-            System.out.printf("Rank %d: %s (ID: %d) -> Score: %.6f\n",
-                    i + 1,
-                    result.getAuditor().getName(),
-                    result.getAuditor().getId(),
-                    result.getFinalScore()
-            );
-        }
-        System.out.println("=======================================================");
-
-        return rankingResults;
-    }
-
-    // Matriks Pembobotan (V) = W_j * r_ij
-    // Method ini bisa digunakan untuk menampilkan V_ij di Matriks Pembobotan
-    @Transactional(readOnly = true)
-    public Map<Long, Double> getWeightedScores() {
-        List<AuditorScore> allScores = auditorScoreRepository.findAll();
-        Map<Long, Double> weightedScoreMap = new HashMap<>(); // Key: AuditorScore.id
-
-        for (AuditorScore score : allScores) {
-            Double normalizedValue = score.getNormalizedValue() != null ? score.getNormalizedValue() : 0.0;
-            Double weight = score.getCriteria() != null ? score.getCriteria().getBobot() : 0.0;
-
-            double weightedValue = normalizedValue * weight;
-            weightedScoreMap.put(score.getId(), weightedValue);
-        }
-        return weightedScoreMap;
-    }
-
 
     @Transactional(readOnly = true)
     public Map<String, Double> calculateAggregatedNormalizationMatrix() {
@@ -219,5 +137,60 @@ public class CalculationService {
         }
 
         return finalNormalizedMap;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RankingResult> calculateFinalRanking() {
+
+        // 1. Ambil Auditor
+        List<Auditor> auditors = auditorRepository.findAll();
+
+        // 2. Mendapatkan Matriks Keputusan Ternormalisasi Akhir (R_ij)
+        //    Input dari fungsi normalisasi kriteria sebelumnya.
+        Map<String, Double> finalNormalizedMatrix = this.calculateFinalNormalizedCriteriaMatrix();
+
+        // 3. Ambil Bobot Kriteria Utama (W_j)
+        List<Criteria> criteriaList = criteriaRepository.findAll();
+        Map<Long, Double> criteriaWeights = criteriaList.stream()
+                .collect(Collectors.toMap(
+                        Criteria::getId,
+                        criteria -> criteria.getBobot() != null ? criteria.getBobot() : 0.0
+                ));
+
+        // 4. Hitung Skor Preferensi Akhir (Final Score) per Auditor
+        List<RankingResult> rankingResults = auditors.stream()
+                .map(auditor -> {
+                    double finalScore = 0.0;
+
+                    // Iterasi melalui semua Kriteria Utama
+                    for (Criteria criteria : criteriaList) {
+
+                        String key = auditor.getId() + "_" + criteria.getId();
+
+                        // A. Ambil Matriks Ternormalisasi (R_ij)
+                        Double normalizedScore = finalNormalizedMatrix.getOrDefault(key, 0.0);
+
+                        // B. Ambil Bobot Kriteria Utama (W_j)
+                        Double weight = criteriaWeights.getOrDefault(criteria.getId(), 0.0);
+
+                        // C. Perkalian dan Agregasi
+                        double weightedContribution = normalizedScore * weight;
+                        finalScore += weightedContribution;
+
+                    }
+
+
+                    return new RankingResult(auditor, finalScore);
+                })
+                .collect(Collectors.toList());
+
+        // 5. Urutkan Ranking (Skor tertinggi adalah peringkat 1)
+        rankingResults.sort(Comparator.comparingDouble(RankingResult::getFinalScore).reversed());
+
+        for (int i = 0; i < rankingResults.size(); i++) {
+            RankingResult result = rankingResults.get(i);
+        }
+
+        return rankingResults;
     }
 }
