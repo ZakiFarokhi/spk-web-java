@@ -123,7 +123,7 @@
                                                             </select>
                                                         </th:block>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" sec:authorize="hasRole('USER')">
                                                         <th:block th:with="scoreKey=${auditor.id + '_' + sc.id}, currentScore=${scoreMap.get(scoreKey)}">
 
                                                             <input type="hidden" th:name="'scoreIds[' + ${currentScore.id} + ']'"
