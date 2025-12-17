@@ -1,13 +1,35 @@
 <!DOCTYPE html>
-<html layout:decorate="~{shared/layout}"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html layout:decorate="~{shared/layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <style>
+        table.table-hover tbody tr:hover {
+            background-color: #f7f7f7;
+        }
 
+
+        td,
+        th {
+            vertical-align: middle !important;
+        }
+
+        .card {
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #3c8dbc;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+        }
+    </style>
 </head>
+
 <body>
 
 <div layout:fragment="content">
@@ -34,7 +56,7 @@
         <div class="container-fluid">
             <!-- Small boxes (Stat box) -->
             <div class="row">
-                <div class="col-lg-3 col-6">
+                <div class="col-lg-4 col-6">
                     <!-- small box -->
                     <div class="small-box bg-info">
                         <div class="inner">
@@ -45,61 +67,91 @@
                         <div class="icon">
                             <i class="ion ion-person"></i>
                         </div>
-                        <a class="small-box-footer" href="/auditors">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/auditors">More info <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <!-- ./col -->
-                <div class="col-lg-3 col-6">
+                <div class="col-lg-4 col-6">
                     <!-- small box -->
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>53<sup style="font-size: 20px">%</sup></h3>
+                            <h3 th:text="${criteriaCount}">53<sup style="font-size: 20px">%</sup></h3>
 
-                            <p>Bounce Rate</p>
+                            <p>Total Criteria</p>
                         </div>
                         <div class="icon">
                             <i class="ion ion-stats-bars"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/criterias">More info <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <!-- ./col -->
-                <div class="col-lg-3 col-6">
+                <div class="col-lg-4 col-6">
                     <!-- small box -->
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>44</h3>
+                            <h3 th:text="${subCriteriaCount}">53<sup style="font-size: 20px">%</sup></h3>
 
-                            <p>User Registrations</p>
+                            <p>Total Criteria</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-person-add"></i>
+                            <i class="ion ion-stats-bars"></i>
                         </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        <a class="small-box-footer" href="/sub_criterias">More info <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>65</h3>
+            </div>
+            <div class="row">
+                    <div class="col-lg-12 col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover mt-3">
+                                <thead>
+                                <tr class="bg-primary text-white text-center">
+                                    <th style="width: 50px;">Ranking</th>
+                                    <th style="min-width: 200px;">Auditor</th>
+                                    <th style="min-width: 200px;">Jabatan</th>
+                                    <th style="min-width: 200px;">Unit Kerja</th>
+                                    <th style="min-width: 150px;">Skor Preferensi ($V_i$)</th>
+                                    <th style="min-width: 150px;">Keterangan</th>
 
-                            <p>Unique Visitors</p>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr th:each="result, status : ${rankings}">
+                                    <td class="text-center fw-bold"
+                                        th:text="${status.count}"
+                                        th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}">
+                                        1
+                                    </td>
+                                    <td th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}" th:text="${result.auditor.name}">Nama Auditor Terbaik</td>
+                                    <td th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}" th:text="${result.auditor.jabatan}">Nama Auditor Terbaik</td>
+                                    <td th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}" th:text="${result.auditor.unit_kerja}">Nama Auditor Terbaik</td>
+                                    <td class="text-center fw-bold"
+                                        th:text="${#numbers.formatDecimal(result.finalScore, 1, 6)}"
+                                        th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}">
+                                        0.954321
+                                    </td>
+                                    <td class="text-center fw-bold" th:classappend="${status.count == 1 ? 'bg-warning' : 'bg-white'}">
+                                        <div th:switch="true">
+                                            <span th:case="${result.finalScore >= 0.9}" class="badge bg-success text-white fw-bold p-2">SANGAT BAIK</span>
+                                            <span th:case="${result.finalScore >= 0.75}" class="badge bg-primary text-white fw-bold p-2">BAIK</span>
+                                            <span th:case="${result.finalScore >= 0.6}" class="badge bg-info text-dark fw-bold p-2">CUKUP</span>
+                                            <span th:case="${result.finalScore >= 0.45}" class="badge bg-secondary text-white fw-bold p-2">KURANG</span>
+                                            <span th:case="*" class="badge bg-danger text-white fw-bold p-2">SANGAT KURANG</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="icon">
-                            <i class="ion ion-pie-graph"></i>
-                        </div>
-                        <a class="small-box-footer" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
-                    </div>
                 </div>
-                <!-- ./col -->
             </div>
         </div>
     </section>
-    <!-- End Main content -->
-
-
 </div>
 
 <th:block layout:fragment="script">
@@ -108,4 +160,5 @@
     </script>
 </th:block>
 </body>
+
 </html>

@@ -62,7 +62,11 @@
                                     <tr class="bg-primary text-white text-center">
                                         <th style="width: 50px;">Ranking</th>
                                         <th style="min-width: 200px;">Auditor</th>
+                                        <th style="min-width: 200px;">Jabatan</th>
+                                        <th style="min-width: 200px;">Unit Kerja</th>
                                         <th style="min-width: 150px;">Skor Preferensi ($V_i$)</th>
+                                        <th style="min-width: 150px;">Keterangan</th>
+
                                     </tr>
                                     </thead>
 
@@ -73,11 +77,22 @@
                                             th:classappend="${status.count == 1 ? 'bg-warning' : ''}">
                                             1
                                         </td>
-                                        <td th:text="${result.auditor.name}">Nama Auditor Terbaik</td>
+                                        <td th:classappend="${status.count == 1 ? 'bg-warning' : ''}" th:text="${result.auditor.name}">Nama Auditor Terbaik</td>
+                                        <td th:classappend="${status.count == 1 ? 'bg-warning' : ''}" th:text="${result.auditor.jabatan}">Nama Auditor Terbaik</td>
+                                        <td th:classappend="${status.count == 1 ? 'bg-warning' : ''}" th:text="${result.auditor.unit_kerja}">Nama Auditor Terbaik</td>
                                         <td class="text-center fw-bold"
                                             th:text="${#numbers.formatDecimal(result.finalScore, 1, 6)}"
                                             th:classappend="${status.count == 1 ? 'bg-warning' : ''}">
                                             0.954321
+                                        </td>
+                                        <td class="text-center fw-bold" th:classappend="${status.count == 1 ? 'bg-warning' : ''}">
+                                            <div th:switch="true">
+                                                <span th:case="${result.finalScore >= 0.9}" class="badge bg-success text-white fw-bold p-2">SANGAT BAIK</span>
+                                                <span th:case="${result.finalScore >= 0.75}" class="badge bg-primary text-white fw-bold p-2">BAIK</span>
+                                                <span th:case="${result.finalScore >= 0.6}" class="badge bg-info text-dark fw-bold p-2">CUKUP</span>
+                                                <span th:case="${result.finalScore >= 0.45}" class="badge bg-secondary text-white fw-bold p-2">KURANG</span>
+                                                <span th:case="*" class="badge bg-danger text-white fw-bold p-2">SANGAT KURANG</span>
+                                            </div>
                                         </td>
                                     </tr>
                                     </tbody>
