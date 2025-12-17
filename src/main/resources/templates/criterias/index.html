@@ -62,7 +62,7 @@
         <div class="card-body">
 
             <!-- CREATE BAR -->
-            <form th:action="@{/criterias/create}" method="post" class="mb-4 create-bar">
+            <form th:action="@{/criterias/create}" method="post" class="mb-4 create-bar" sec:authorize="hasRole('ADMIN')">
                 <div class="row g-2">
 
                     <div class="col-md-2">
@@ -102,7 +102,7 @@
                     <th>Name</th>
                     <th>bobot</th>
                     <th>Indeks</th>
-                    <th style="width: 140px">Action</th>
+                    <th sec:authorize="hasRole('ADMIN')" style="width: 140px">Action</th>
                 </tr>
                 </thead>
 
@@ -121,7 +121,7 @@
                             <td th:text="${u.bobot}"></td>
                             <td th:text="${u.indeks}"></td>
 
-                            <td class="text-center">
+                            <td sec:authorize="hasRole('ADMIN')" class="text-center">
                                 <a th:href="@{'/criterias?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
                                     <i class="fas fa-edit"></i>
                                 </a>

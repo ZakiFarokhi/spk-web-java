@@ -62,7 +62,7 @@
         <div class="card-body">
 
             <!-- CREATE BAR -->
-            <form th:action="@{/auditors/create}" method="post" class="mb-4 create-bar">
+            <form th:action="@{/auditors/create}" method="post" class="mb-4 create-bar" sec:authorize="hasRole('ADMIN')">
                 <div class="row g-2">
 
                     <div class="col-md-2">
@@ -106,7 +106,7 @@
                     <th>Jabatan</th>
                     <th>Unit Kerja</th>
                     <th>Pendidikan</th>
-                    <th style="width: 140px">Action</th>
+                    <th sec:authorize="hasRole('ADMIN')" style="width: 140px">Action</th>
                 </tr>
                 </thead>
 
@@ -126,7 +126,7 @@
                             <td th:text="${u.unit_kerja}"></td>
                             <td th:text="${u.pendidikan != null ? u.pendidikan.name : '-'}"></td>
 
-                            <td class="text-center">
+                            <td sec:authorize="hasRole('ADMIN')" class="text-center">
                                 <a th:href="@{'/auditors?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
                                     <i class="fas fa-edit"></i>
                                 </a>
