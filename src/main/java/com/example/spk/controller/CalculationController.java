@@ -69,7 +69,7 @@ public class CalculationController {
     }
 
     @GetMapping("/normalization/export")
-    public String exportNormalizationMatrix(HttpServletResponse response) throws IOException {
+    public void exportNormalizationMatrix(HttpServletResponse response) throws IOException {
         List<Auditor> auditors = auditorService.findAll();
         List<Criteria> criteriaList = criteriaService.findAll();
         List<AuditorScore> allScores = auditorScoreService.findAll();
@@ -85,7 +85,7 @@ public class CalculationController {
         try (XSSFWorkbook workbook = excelExportService.exportNormalizationMatrix(auditors, allSubCriteria, normalizedScoreMap)) {
             workbook.write(response.getOutputStream());
         }
-        return "redirect:/calculation/normalization";
+        //return "redirect:/calculation/normalization";
     }
 
 
@@ -109,7 +109,7 @@ public class CalculationController {
     }
 
     @GetMapping("/aggregated/export")
-    public String exportAggregatedMatrix(HttpServletResponse response) throws IOException {
+    public void exportAggregatedMatrix(HttpServletResponse response) throws IOException {
         List<Auditor> auditors = auditorService.findAll();
         List<Criteria> criteriaList = criteriaService.findAll();
 
@@ -119,7 +119,6 @@ public class CalculationController {
         try (XSSFWorkbook workbook = excelExportService.exportCriteriaMatrix(auditors, criteriaList, aggregatedScoreMap, "Aggregated Scores C_j,norm")) {
             workbook.write(response.getOutputStream());
         }
-        return "redirect:/calculation/aggregated";
     }
 
     @GetMapping("/final_normalized")
@@ -141,7 +140,7 @@ public class CalculationController {
     }
 
     @GetMapping("/final-normalized/export")
-    public String exportFinalNormalizedMatrix(HttpServletResponse response) throws IOException {
+    public void exportFinalNormalizedMatrix(HttpServletResponse response) throws IOException {
         List<Auditor> auditors = auditorService.findAll();
         List<Criteria> criteriaList = criteriaService.findAll();
 
@@ -151,7 +150,6 @@ public class CalculationController {
         try (XSSFWorkbook workbook = excelExportService.exportCriteriaMatrix(auditors, criteriaList, finalNormalizedMap, "Final Normalized R_ij")) {
             workbook.write(response.getOutputStream());
         }
-        return "redirect:/calculation/final_normalized";
     }
 
     @GetMapping("/ranking")
@@ -184,7 +182,7 @@ public class CalculationController {
     }
 
     @GetMapping("/ranking/export")
-    public String exportRankingResult(HttpServletResponse response) throws IOException {
+    public void exportRankingResult(HttpServletResponse response) throws IOException {
 
         List<RankingResult> rankingResults = calculationService.calculateFinalRanking();
 
@@ -192,7 +190,6 @@ public class CalculationController {
         try (XSSFWorkbook workbook = excelExportService.exportRankingResult(rankingResults)) {
             workbook.write(response.getOutputStream());
         }
-        return "redirect:/calculation/ranking";
     }
 
 }
