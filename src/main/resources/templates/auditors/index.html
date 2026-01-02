@@ -112,14 +112,14 @@
 
                 <tbody>
 
-                <tr th:each="u : ${auditors}"
+                <tr th:each="u,i : ${auditors}"
                     th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
 
                     <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
 
                         <!-- VIEW MODE -->
                         <th:block th:if="${!isEdit}">
-                            <td th:text="${u.id}"></td>
+                            <td th:text="${i.count}"></td>
                             <td th:text="${u.name}"></td>
                             <td th:text="${u.nip}"></td>
                             <td th:text="${u.jabatan}"></td>
@@ -131,7 +131,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form th:action="@{'/auditors/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                <form th:action="@{'/auditors/delete/' + ${u.id}}" method="get" style="display:inline;">
                                     <button class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
                                     </button>

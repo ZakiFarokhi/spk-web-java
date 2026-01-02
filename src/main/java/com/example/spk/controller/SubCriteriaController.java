@@ -57,7 +57,7 @@ public class SubCriteriaController {
 
 
     // Hapus criteria
-    @PostMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteCriteria(@PathVariable Long id) {
         subCriteriaService.deleteById(id);
         return "redirect:/sub_criterias";
@@ -76,7 +76,7 @@ public class SubCriteriaController {
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/edit.html
     }
 
-    @PostMapping("/crips/delete/{id}")
+    @GetMapping("/crips/delete/{id}")
     public String deleteCrips(@PathVariable Long id) {
         cripsService.deleteById(id);
         return "redirect:/sub_criterias";

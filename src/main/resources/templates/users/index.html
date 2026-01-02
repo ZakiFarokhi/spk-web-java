@@ -107,14 +107,14 @@
 
                 <tbody>
 
-                <tr th:each="u : ${users}"
+                <tr th:each="u,i : ${users}"
                     th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
 
                     <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
 
                         <!-- VIEW MODE -->
                         <th:block th:if="${!isEdit}">
-                            <td th:text="${u.id}"></td>
+                            <td th:text="${i.count}"></td>
                             <td th:text="${u.username}"></td>
                             <td th:text="${u.email}"></td>
                             <td>••••••</td>

@@ -113,8 +113,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <th:block th:each="u : ${sub_criterias}">
-                    <tr th:id="'row-main-' + ${u.id}"
+                <th:block th:each="u,i : ${sub_criterias}">
+                    <tr th:id="'row-main-' + ${i.count}"
                         th:classappend="${#strings.equals(param.edit, u.id + '')} ? 'edit-row'">
                         <th:block th:with="isEdit=${#strings.equals(param.edit, u.id + '')}">
                             <th:block th:if="${!isEdit}">
@@ -138,7 +138,7 @@
                                     <a th:href="@{'/sub_criterias?edit=' + ${u.id}}" class="btn btn-warning btn-sm me-1">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form th:action="@{'/sub_criterias/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                    <form th:action="@{'/sub_criterias/delete/' + ${u.id}}" method="get" style="display:inline;">
                                         <button class="btn btn-danger btn-sm">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -206,12 +206,12 @@
                                             <div sec:authorize="hasRole('ADMIN')" class="custom-cell" style="width: 140px;"><b>Aksi</b></div>
                                         </div>
                                         <th:block>
-                                            <div th:each="c : ${u.cripsList}" class="custom-row">
-                                                <div class="custom-cell" th:text="${c.id}"></div>
+                                            <div th:each="c, i : ${u.cripsList}" class="custom-row">
+                                                <div class="custom-cell" th:text="${i.count}"></div>
                                                 <div class="custom-cell" th:text="${c.description}">Sangat Baik</div>
                                                 <div class="custom-cell" th:text="${c.nilai}">5</div>
                                                 <div sec:authorize="hasRole('ADMIN')" class="custom-cell">
-                                                    <form th:action="@{'sub_criterias/crips/delete/' + ${c.id}}" method="post" style="display:inline;">
+                                                    <form th:action="@{'sub_criterias/crips/delete/' + ${c.id}}" method="get" style="display:inline;">
                                                         <button class="btn btn-danger btn-xs">
                                                             <i class="fas fa-trash"></i>
                                                         </button>

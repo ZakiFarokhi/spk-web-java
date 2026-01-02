@@ -52,7 +52,7 @@ public class AuditorController {
     }
 
     // ➤ DELETE
-    @PostMapping("/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
         auditorService.deleteById(id);
         return "redirect:/auditors";
