@@ -24,6 +24,7 @@ public class AuditorScoreService {
     @Autowired private SubCriteriaService subCriteriaService;
     @Autowired private CripsService cripsService;
 
+
     // --- CONSTANTS ---
     private static final Double DEFAULT_RAW_VALUE = 0.0;
     private static final Pattern RAW_VALUE_PATTERN = Pattern.compile("^rawValues\\[(\\d+)\\]$");
@@ -32,6 +33,10 @@ public class AuditorScoreService {
     // ====================================================================
     // 1. DATA RETRIEVAL & GENERATION
     // ====================================================================
+
+    public void deleteByAuditorId(Long auditorId) {
+        auditorScoreRepository.deleteByAuditor_Id(auditorId);
+    }
 
     public List<AuditorScore> findAll(){
         return auditorScoreRepository.findAll();

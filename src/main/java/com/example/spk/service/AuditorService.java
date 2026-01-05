@@ -6,9 +6,11 @@ import com.example.spk.entity.Auditor;
 import com.example.spk.entity.SubCriteria;
 import com.example.spk.entity.User;
 import com.example.spk.repository.AuditorRepository;
+import com.example.spk.repository.AuditorScoreRepository;
 import com.example.spk.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.spk.service.AuditorService;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +18,11 @@ import java.util.Optional;
 @Service
 public class AuditorService {
     private final AuditorRepository auditorRepository;
+    private final AuditorScoreRepository auditorScoreRepository;
 
-
-    public AuditorService(AuditorRepository auditorRepository) {
+    public AuditorService(AuditorRepository auditorRepository, AuditorScoreRepository auditorScoreRepository) {
         this.auditorRepository = auditorRepository;
+        this.auditorScoreRepository = auditorScoreRepository;
     }
 
     public List<Auditor> findAll() { return auditorRepository.findAll(); }
@@ -52,7 +55,9 @@ public class AuditorService {
     }
 
     public void deleteById(Long id) {
+        auditorScoreRepository.deleteByAuditor_Id(id);
         auditorRepository.deleteById(id);
+
     }
 
     public Auditor update(Long id, AuditorDto dto) {
