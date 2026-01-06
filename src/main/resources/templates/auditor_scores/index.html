@@ -89,11 +89,11 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr th:each="auditor : ${auditors}">
+                                        <tr th:each="auditor, i : ${auditors}">
 
                                             <form th:action="@{/auditor-scores/update-row}" method="POST">
 
-                                                <td th:text="${auditor.id}">1</td>
+                                                <td th:text="${i.count}">1</td>
                                                 <td th:text="${auditor.name}">Nama Auditor A</td>
 
                                                 <th:block th:each="sc : ${subCriteriaList}">
