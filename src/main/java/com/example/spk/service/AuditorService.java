@@ -51,6 +51,7 @@ public class AuditorService {
         auditor.setUnit_kerja(dto.getUnit_kerja());
         auditor.setPendidikan(dto.getPendidikan());
         auditor.setEnabled(true);
+
         return save(auditor);
     }
 

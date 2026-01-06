@@ -18,11 +18,13 @@ public class AuditorController {
     private final AuditorService auditorService;
     private final PendidikanService pendidikanService;
     private final CriteriaService criteriaService;
+    private final AuditorScoreService auditorScoreService;
 
-    public AuditorController(AuditorService auditorService, PendidikanService pendidikanService, CriteriaService criteriaService) {
+    public AuditorController(AuditorService auditorService, PendidikanService pendidikanService, CriteriaService criteriaService, AuditorScoreService auditorScoreService) {
         this.auditorService = auditorService;
         this.pendidikanService = pendidikanService;
         this.criteriaService = criteriaService;
+        this.auditorScoreService = auditorScoreService;
     }
 
     // ➤ LIST USERS
@@ -39,8 +41,9 @@ public class AuditorController {
     // ➤ PROCESS CREATE
     @PostMapping("/create")
     public String store(Auditor auditor) {
-        auditorService.save(auditor);
-            return "redirect:/auditors";
+        Auditor newAuditor = auditorService.save(auditor);
+        auditorScoreService.generateDefaultScoreByAuditorId(newAuditor.getId());
+        return "redirect:/auditors";
     }
 
 

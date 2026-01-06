@@ -125,7 +125,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form th:action="@{'/users/delete/' + ${u.id}}" method="post" style="display:inline;">
+                                <form th:action="@{'/users/delete/' + ${u.id}}" method="get" style="display:inline;">
                                     <button class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
                                     </button>

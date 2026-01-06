@@ -63,6 +63,23 @@ public class AuditorScoreService {
         return scoreMap;
     }
 
+    public void generateDefaultScoreByAuditorId( Long auditorId){
+        List<SubCriteria> subCriteriaList = subCriteriaService.findAll();
+        Optional<Auditor> auditor = auditorService.findById(auditorId);
+
+        for (SubCriteria subCriteria : subCriteriaList) {
+            AuditorScore score = new AuditorScore();
+            score.setAuditor(auditor.get());
+            score.setCriteria(subCriteria.getCriteria());
+            score.setSubCriteria(subCriteria);
+            score.setCrips(null);
+            score.setRawValue(DEFAULT_RAW_VALUE);
+            score.setNormalizedValue(null);
+
+            auditorScoreRepository.save(score);
+        }
+    }
+
     @Transactional
     public void generateDefaultScores(Long criteriaId) {
         if (isDataGenerated(criteriaId)) {
