@@ -58,4 +58,17 @@ public class CriteriaController {
 
         criteriaService.exportToExcel(response);
     }
+
+    @GetMapping("/export-pdf")
+    public void exportToPdf(HttpServletResponse response) {
+        try {
+            // Mengatur metadata response untuk file PDF
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=Laporan_Kriteria_SPK.pdf");
+
+            criteriaService.exportToPdf(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

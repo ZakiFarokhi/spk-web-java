@@ -2,6 +2,8 @@ package com.example.spk.service;
 
 import com.example.spk.entity.*;
 import com.example.spk.repository.AuditorScoreRepository;
+import com.example.spk.util.KopSuratEventHandler;
+import com.itextpdf.kernel.events.PdfDocumentEvent;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
@@ -10,13 +12,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.VerticalAlignment;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 
 @Service
 public class AuditorScoreService {
@@ -327,7 +341,7 @@ public class AuditorScoreService {
         Font font = workbook.createFont();
         font.setBold(true);
         headerStyle.setFont(font);
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
         headerStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headerStyle.setBorderBottom(BorderStyle.THIN);
@@ -340,7 +354,7 @@ public class AuditorScoreService {
         // Header dinamis berdasarkan Sub Kriteria
         int colIdx = 2;
         for (SubCriteria sc : subCriteriaList) {
-            Cell cell = headerRow.createCell(colIdx++);
+            org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(colIdx++);
             cell.setCellValue(sc.getCode() + " - " + sc.getName());
             cell.setCellStyle(headerStyle);
         }
@@ -376,5 +390,78 @@ public class AuditorScoreService {
 
         workbook.write(response.getOutputStream());
         workbook.close();
+    }
+
+    public void exportToPdf(Long criteriaId, HttpServletResponse response) throws Exception {
+        Criteria criteria = criteriaService.findById(criteriaId)
+                .orElseThrow(() -> new RuntimeException("Kriteria tidak ditemukan"));
+
+        List<Auditor> auditors = auditorService.findAll();
+        List<SubCriteria> subCriteriaList = subCriteriaService.findByCriteriaId(criteriaId);
+        List<AuditorScore> scores = getScoresByCriteria(criteriaId);
+        Map<String, AuditorScore> scoreMap = convertListToMap(scores);
+
+        PdfWriter writer = new PdfWriter(response.getOutputStream());
+        PdfDocument pdf = new PdfDocument(writer);
+
+        // Daftarkan Kop Surat
+        String logoPath = "src/main/resources/static/assets/img/logo-jakarta-bw.png";
+        pdf.addEventHandler(PdfDocumentEvent.START_PAGE, new KopSuratEventHandler(logoPath));
+
+        // Gunakan Landscape jika sub-kriteria lebih dari 3 agar tidak sesak
+        PageSize pageSize = subCriteriaList.size() > 3 ? PageSize.A4.rotate() : PageSize.A4;
+        Document document = new Document(pdf, pageSize);
+        document.setMargins(135, 36, 40, 36);
+
+        document.add(new Paragraph("LAPORAN KONVERSI NILAI AUDITOR")
+                .setBold().setFontSize(12).setTextAlignment(TextAlignment.CENTER).setMarginBottom(5));
+        document.add(new Paragraph("Kriteria: " + criteria.getName() + " (" + criteria.getCode() + ")")
+                .setTextAlignment(TextAlignment.CENTER).setMarginBottom(15));
+
+        // Hitung lebar kolom: No (1), Nama (4), Sub-Kriteria (2 per kolom)
+        int totalCols = 2 + subCriteriaList.size();
+        float[] relativeWidths = new float[totalCols];
+        relativeWidths[0] = 1f;
+        relativeWidths[1] = 4f;
+        for (int i = 2; i < totalCols; i++) relativeWidths[i] = 3f;
+
+        com.itextpdf.layout.element.Table table = new Table(UnitValue.createPercentArray(relativeWidths)).useAllAvailableWidth();
+
+        // Header Tabel
+        table.addHeaderCell(new Cell().add(new Paragraph("No").setBold()));
+        table.addHeaderCell(new Cell().add(new Paragraph("Nama Auditor").setBold()));
+        for (SubCriteria sc : subCriteriaList) {
+            table.addHeaderCell(new Cell().add(new Paragraph(sc.getCode()).setBold()));
+        }
+
+        // Isi Data
+        int no = 1;
+        for (Auditor auditor : auditors) {
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(no++))));
+            table.addCell(new Cell().add(new Paragraph(auditor.getName())));
+
+            for (SubCriteria sc : subCriteriaList) {
+                String key = auditor.getId() + "_" + sc.getId();
+                AuditorScore score = scoreMap.get(key);
+                String valTxt = (score != null && score.getCrips() != null)
+                        ? score.getCrips().getDescription() + " (" + score.getRawValue() + ")"
+                        : "-";
+                table.addCell(new Cell().add(new Paragraph(valTxt).setFontSize(9)));
+            }
+        }
+        document.add(table);
+
+        // Footer Tanda Tangan
+        document.add(new Paragraph("\n"));
+        String tgl = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("id", "ID")));
+        Table footer = new Table(1).setWidth(250f).setHorizontalAlignment(HorizontalAlignment.RIGHT);
+        footer.addCell(new Cell().add(new Paragraph("Jakarta, " + tgl).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+        footer.addCell(new Cell().add(new Paragraph("Inspektur Provinsi DKI Jakarta").setBold().setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+        footer.addCell(new Cell().add(new Paragraph("\n\n\n")).setBorder(Border.NO_BORDER));
+        footer.addCell(new Cell().add(new Paragraph("Dhany Sukma").setBold().setUnderline().setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+        footer.addCell(new Cell().add(new Paragraph("Pembina Utama Muda (IV/D)").setFontSize(10).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+
+        document.add(footer);
+        document.close();
     }
 }

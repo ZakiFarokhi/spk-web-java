@@ -192,4 +192,32 @@ public class CalculationController {
         }
     }
 
+    @GetMapping("/normalization/pdf")
+    public void downloadNormalizationPdf(HttpServletResponse response) throws Exception {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Matriks_Normalisasi_Sub.pdf");
+        calculationService.exportNormalizationPdf(response);
+    }
+
+    @GetMapping("/aggregated/pdf")
+    public void downloadAggregatedPdf(HttpServletResponse response) throws Exception {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Matriks_Aggregated.pdf");
+        calculationService.exportAggregatedPdf(response);
+    }
+
+    @GetMapping("/final-normalized/pdf")
+    public void downloadFinalPdf(HttpServletResponse response) throws Exception {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Matriks_Final_Rij.pdf");
+        calculationService.exportFinalNormalizedPdf(response);
+    }
+
+    @GetMapping("/ranking/pdf")
+    public void downloadRankingPdf(HttpServletResponse response) throws Exception {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Laporan_Ranking_SAW.pdf");
+        calculationService.exportRankingPdf(response);
+    }
+
 }

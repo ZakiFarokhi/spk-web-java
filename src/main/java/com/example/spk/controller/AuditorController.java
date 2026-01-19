@@ -73,4 +73,15 @@ public class AuditorController {
         auditorService.exportToExcel(response);
     }
 
+    @GetMapping("/export-pdf")
+    public void exportPdf(HttpServletResponse response) {
+        try {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=data_auditor.pdf");
+            auditorService.exportToPdf(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

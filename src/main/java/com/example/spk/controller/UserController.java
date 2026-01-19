@@ -75,4 +75,15 @@ public class UserController {
         userService.exportToExcel(response);
     }
 
+    @GetMapping("/export-pdf")
+    public void exportPdf(HttpServletResponse response) {
+        try {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=data_users.pdf");
+            userService.exportToPdf(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

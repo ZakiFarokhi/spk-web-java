@@ -93,4 +93,15 @@ public class SubCriteriaController {
 
         subCriteriaService.exportToExcel(response);
     }
+
+    @GetMapping("/export-pdf")
+    public void exportPdf(HttpServletResponse response) {
+        try {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=Laporan_SubKriteria_SPK.pdf");
+            subCriteriaService.exportToPdf(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

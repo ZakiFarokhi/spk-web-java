@@ -43,9 +43,18 @@
                             Matriks ini menampilkan nilai mentah setelah dinormalisasi ($r_{ij}$).
                             Nilai berkisar antara 0 hingga 1.
                         </p>
-                        <a th:href="@{/calculation/normalization/export}" class="btn btn-info mr-2">
-                            <i class="fas fa-file-excel"></i> Export Normalisasi Sub-Kriteria
-                        </a>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <a th:href="@{/calculation/normalization/export}" class="btn btn-success w-100">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a th:href="@{/calculation/normalization/pdf}" class="btn btn-danger w-100">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </a>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover mt-3">
                                 <thead>

@@ -157,4 +157,18 @@ public class AuditorScoreController {
         scoreService.exportToExcel(criteriaId, response);
     }
 
+    @GetMapping("/export-pdf/{criteriaId}")
+    public void exportPdf(@PathVariable Long criteriaId, HttpServletResponse response) {
+        try {
+            response.setContentType("application/pdf");
+            // Nama file dinamis berdasarkan ID kriteria
+            response.setHeader("Content-Disposition", "attachment; filename=Konversi_Kriteria_" + criteriaId + ".pdf");
+
+            scoreService.exportToPdf(criteriaId, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Anda bisa menambahkan redirect ke halaman error jika diperlukan
+        }
+    }
+
 }
