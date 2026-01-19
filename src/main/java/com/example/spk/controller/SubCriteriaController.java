@@ -6,6 +6,7 @@ import com.example.spk.entity.SubCriteria;
 import com.example.spk.service.CripsService;
 import com.example.spk.service.CriteriaService;
 import com.example.spk.service.SubCriteriaService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -80,5 +82,15 @@ public class SubCriteriaController {
     public String deleteCrips(@PathVariable Long id) {
         cripsService.deleteById(id);
         return "redirect:/sub_criterias";
+    }
+
+    @GetMapping("/export")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=data_sub_kriteria_crips.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        subCriteriaService.exportToExcel(response);
     }
 }

@@ -71,6 +71,11 @@
                         <div th:if="${isGenerated}">
                             <p class="alert alert-info">Matriks penilaian sudah terbentuk. Nilai yang ditampilkan adalah nilai
                                 mentah (Raw Value) yang tersimpan.</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <a th:href="@{'/auditor-scores/export/' + ${criteriaId}}" class="btn btn-success ms-2" style="height: fit-content;">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </a>
+                            </div>
 
                             <th:block th:with="scoreMap=${scoreMap}">
 

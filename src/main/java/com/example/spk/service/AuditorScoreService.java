@@ -2,10 +2,14 @@ package com.example.spk.service;
 
 import com.example.spk.entity.*;
 import com.example.spk.repository.AuditorScoreRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -306,4 +310,71 @@ public class AuditorScoreService {
         }
     }
 
+    public void exportToExcel(Long criteriaId, HttpServletResponse response) throws IOException {
+        Criteria criteria = criteriaService.findById(criteriaId)
+                .orElseThrow(() -> new RuntimeException("Kriteria tidak ditemukan"));
+
+        List<Auditor> auditors = auditorService.findAll();
+        List<SubCriteria> subCriteriaList = subCriteriaService.findByCriteriaId(criteriaId);
+        List<AuditorScore> scores = getScoresByCriteria(criteriaId);
+        Map<String, AuditorScore> scoreMap = convertListToMap(scores);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Konversi - " + criteria.getName());
+
+        // --- STYLE ---
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+
+        // --- HEADER ---
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("No");
+        headerRow.createCell(1).setCellValue("Nama Auditor");
+
+        // Header dinamis berdasarkan Sub Kriteria
+        int colIdx = 2;
+        for (SubCriteria sc : subCriteriaList) {
+            Cell cell = headerRow.createCell(colIdx++);
+            cell.setCellValue(sc.getCode() + " - " + sc.getName());
+            cell.setCellStyle(headerStyle);
+        }
+
+        // --- DATA ---
+        int rowIdx = 1;
+        for (int i = 0; i < auditors.size(); i++) {
+            Auditor auditor = auditors.get(i);
+            Row row = sheet.createRow(rowIdx++);
+            row.createCell(0).setCellValue(i + 1);
+            row.createCell(1).setCellValue(auditor.getName());
+
+            int currentCol = 2;
+            for (SubCriteria sc : subCriteriaList) {
+                String key = auditor.getId() + "_" + sc.getId();
+                AuditorScore score = scoreMap.get(key);
+
+                if (score != null && score.getCrips() != null) {
+                    // Menampilkan Deskripsi dan Nilai dalam kurung
+                    row.createCell(currentCol++).setCellValue(
+                            score.getCrips().getDescription() + " (" + score.getRawValue() + ")"
+                    );
+                } else {
+                    row.createCell(currentCol++).setCellValue("-");
+                }
+            }
+        }
+
+        // Auto-size kolom
+        for (int j = 0; j < colIdx; j++) {
+            sheet.autoSizeColumn(j);
+        }
+
+        workbook.write(response.getOutputStream());
+        workbook.close();
+    }
 }

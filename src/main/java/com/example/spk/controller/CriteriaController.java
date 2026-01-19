@@ -2,11 +2,13 @@ package com.example.spk.controller;
 
 import com.example.spk.entity.Criteria;
 import com.example.spk.service.CriteriaService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Controller
@@ -45,5 +47,15 @@ public class CriteriaController {
     public String deleteCriteria(@PathVariable Long id) {
         criteriaService.deleteById(id);
         return "redirect:/criterias";
+    }
+
+    @GetMapping("/export")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=data_kriteria.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        criteriaService.exportToExcel(response);
     }
 }

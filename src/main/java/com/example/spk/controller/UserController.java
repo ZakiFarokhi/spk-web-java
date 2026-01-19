@@ -5,10 +5,12 @@ import com.example.spk.service.AuditorService;
 import com.example.spk.service.CriteriaService;
 import com.example.spk.service.RoleService;
 import com.example.spk.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Controller
@@ -61,6 +63,16 @@ public class UserController {
     public String delete(@PathVariable Long id) {
         userService.deleteById(id);
         return "redirect:/users";
+    }
+
+    @GetMapping("/export")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=data_users.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        userService.exportToExcel(response);
     }
 
 }

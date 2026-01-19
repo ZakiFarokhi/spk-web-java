@@ -8,12 +8,14 @@ import com.example.spk.repository.SubCriteriaRepository; // BARU: Tambahkan impo
 import com.example.spk.repository.CriteriaRepository;
 import com.example.spk.repository.CripsRepository;
 import com.example.spk.service.AuditorScoreService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
@@ -143,24 +145,16 @@ public class AuditorScoreController {
         // Redirect kembali ke halaman yang sama (penilaian kriteria yang sedang aktif)
         return "redirect:/auditor-scores/" + criteriaId;
     }
-//    @PostMapping("/update-row")
-//    public String updateScoreRow(
-//            @RequestParam Long auditorId,
-//            @RequestParam Long criteriaId,
-//            // Gunakan Map<String, String> jika Anda tidak yakin bagaimana Spring me-bind type
-//            // Jika Anda yakin Spring bisa mengikatnya, gunakan Map<String, Double> (tapi rawan error)
-//            @RequestParam Map<String, String> allParams, // Ganti tipe data menjadi String untuk menerima _csrf
-//            RedirectAttributes ra)
-//    {
-//        try {
-//            // Panggil service untuk memproses pembaruan Map ini
-//            // Kita meneruskan semua parameter dan biarkan Service yang memfilter dan mengkonversi
-//            scoreService.updateScoresFromMap(allParams);
-//            ra.addFlashAttribute("successMessage", "Nilai auditor " + auditorId + " berhasil diperbarui!");
-//        } catch (Exception e) {
-//            ra.addFlashAttribute("errorMessage", "Gagal update: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        return "redirect:/auditor-scores/" + criteriaId;
-//    }
+
+    @GetMapping("/export/{criteriaId}")
+    public void exportToExcel(@PathVariable Long criteriaId, HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        // Nama file dinamis berdasarkan ID Kriteria
+        String headerValue = "attachment; filename=konversi_kriteria_" + criteriaId + ".xlsx";
+        response.setHeader("Content-Disposition", headerValue);
+
+        scoreService.exportToExcel(criteriaId, response);
+    }
+
 }

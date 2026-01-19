@@ -2,6 +2,7 @@ package com.example.spk.controller;
 
 import com.example.spk.entity.Auditor;
 import com.example.spk.service.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Controller
@@ -59,6 +61,16 @@ public class AuditorController {
     public String delete(@PathVariable Long id) {
         auditorService.deleteById(id);
         return "redirect:/auditors";
+    }
+
+    @GetMapping("/export")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=data_auditors.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        auditorService.exportToExcel(response);
     }
 
 }
