@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -44,16 +45,28 @@ public class SubCriteriaController {
 
     // Form tambah criteria
     @PostMapping("/create")
-    public String create(SubCriteria subCriteria) {
-        subCriteriaService.save(subCriteria);
+    public String create(SubCriteria subCriteria, RedirectAttributes redirectAttributes) {
+        try{
+            subCriteriaService.save(subCriteria);
+            redirectAttributes.addFlashAttribute("success", "SubCriteria Berhasil ditambahkan");
+        } catch (Exception e) {
+            redirectAttributes.addAttribute("error", e.getMessage());
+        }
+
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/add.html
     }
 
 
     // Form edit criteria
     @PostMapping("/update/{id}")
-    public String update(@PathVariable Long id, SubCriteria subCriteria) {
-        subCriteriaService.update(id, subCriteria);
+    public String update(@PathVariable Long id, SubCriteria subCriteria, RedirectAttributes redirectAttributes) {
+        try{
+            subCriteriaService.update(id, subCriteria);
+            redirectAttributes.addFlashAttribute("success", "SubCriteria Berhasil diubah");
+        }
+        catch (Exception e){
+            redirectAttributes.addAttribute("error", e.getMessage());
+        }
         return "redirect:/sub_criterias"; // Thymeleaf template: criteria/edit.html
     }
 

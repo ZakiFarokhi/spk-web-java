@@ -49,8 +49,24 @@ public class CriteriaService {
     public Optional<Criteria> findById(Long id) {
         return criteriaRepository.findById(id);
     }
+    private void validateTotalWeight(Long currentId, Double newWeight) {
+        // 1. Ambil semua kriteria dari DB
+        List<Criteria> allCriteria = criteriaRepository.findAll();
+
+        // 2. Hitung total bobot kriteria LAIN (abaikan data yang sedang di-update)
+        double currentTotal = allCriteria.stream()
+                .filter(c -> currentId == null || !c.getId().equals(currentId))
+                .mapToDouble(c -> c.getBobot() != null ? c.getBobot() : 0.0)
+                .sum();
+
+        // 3. Cek jika total + bobot baru > 1
+        if (currentTotal + newWeight > 1.0001) { // Toleransi floating point
+            throw new RuntimeException("Gagal Simpan! Total bobot seluruh kriteria tidak boleh melebihi 1.0");
+        }
+    }
 
     public Criteria save(Criteria criteria) {
+        validateTotalWeight(null, criteria.getBobot());
         return criteriaRepository.save(criteria);
     }
 
@@ -61,6 +77,7 @@ public class CriteriaService {
 
     public Optional<Criteria> update(Long id, Criteria updatedCriteria) {
         Optional<Criteria> existingCriteria = criteriaRepository.findById(id);
+        validateTotalWeight(id, updatedCriteria.getBobot());
 
         if (existingCriteria.isPresent()) {
             Criteria criteriaToUpdate = existingCriteria.get();

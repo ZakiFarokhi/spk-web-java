@@ -44,6 +44,19 @@ public class SubCriteriaService {
         this.subCriteriaRepository = subCriteriaRepository;
         this.criteriaService = criteriaService;
     }
+    private void checkSubWeightLimit(Long currentSubId, Long criteriaId, Double newWeight) {
+        // Ambil semua sub-kriteria yang memiliki kriteria induk yang sama
+        List<SubCriteria> existingSubs = subCriteriaRepository.findByCriteriaId(criteriaId);
+
+        double totalLain = existingSubs.stream()
+                .filter(s -> currentSubId == null || !s.getId().equals(currentSubId))
+                .mapToDouble(s -> s.getBobot() != null ? s.getBobot() : 0.0)
+                .sum();
+
+        if ((totalLain + newWeight) > 1.0001) {
+            throw new RuntimeException("Total bobot Sub-Kriteria pada kriteria ini melebihi 1.0! ");
+        }
+    }
 
     public List<SubCriteria> findAll() {
         return subCriteriaRepository.findAll();
@@ -61,6 +74,7 @@ public class SubCriteriaService {
     }
 
     public Optional<SubCriteria> update(Long id, SubCriteria updatedSubCriteria) {
+        checkSubWeightLimit(id,updatedSubCriteria.getCriteria().getId(), updatedSubCriteria.getBobot());
         Optional<SubCriteria> existingSubCriteria = subCriteriaRepository.findById(id);
 
         if (existingSubCriteria.isPresent()) {
@@ -78,6 +92,8 @@ public class SubCriteriaService {
     }
 
     public SubCriteria save(SubCriteria subCriteria) {
+        checkSubWeightLimit(null,subCriteria.getCriteria().getId(), subCriteria.getBobot());
+
         return subCriteriaRepository.save(subCriteria);
     }
 

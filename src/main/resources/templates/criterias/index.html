@@ -61,6 +61,17 @@
 
         <div class="card-body">
 
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-triangle"></i> Gagal!</strong>
+                <span th:text="${param.error}">Pesan Error</span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-check-circle"></i> Berhasil!</strong>
+                <span th:text="${success}">Pesan Sukses</span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
             <!-- CREATE BAR -->
             <form th:action="@{/criterias/create}" method="post" class="mb-4 create-bar" sec:authorize="hasRole('ADMIN')">
                 <div class="row g-2">

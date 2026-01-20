@@ -75,6 +75,17 @@
             <h3 class="card-title">Sub Criteria Management</h3>
         </div>
         <div class="card-body">
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-triangle"></i> Gagal!</strong>
+                <span th:text="${param.error}">Pesan Error</span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-check-circle"></i> Berhasil!</strong>
+                <span th:text="${success}">Pesan Sukses</span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
             <form th:action="@{/sub_criterias/create}" method="post" class="mb-4 create-bar" sec:authorize="hasRole('ADMIN')">
                 <div class="row g-2">
                     <div class="col-md-3">
@@ -172,6 +183,7 @@
                                     </td>
                                     <td><input class="form-control" name="code" th:value="${u.code}"></td>
                                     <td><input class="form-control" name="name" th:value="${u.name}"></td>
+                                    <td><input class="form-control" type="number" min="0" max="1" step="0.01" required name="bobot" placeholder="bobot" th:value="${u.bobot}"></td>
                                     <td></td>
                                     <td></td>
                                     <td class="text-center">
