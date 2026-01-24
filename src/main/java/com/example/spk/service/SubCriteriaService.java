@@ -172,7 +172,7 @@ public class SubCriteriaService {
         pdf.addEventHandler(PdfDocumentEvent.START_PAGE, new KopSuratEventHandler(logoPath));
 
         Document document = new Document(pdf, PageSize.A4);
-        document.setMargins(135, 36, 40, 36);
+        document.setMargins(140, 36, 40, 36);
 
         document.add(new Paragraph("DAFTAR SUB-KRITERIA PENILAIAN")
                 .setBold().setFontSize(12).setTextAlignment(TextAlignment.CENTER).setMarginBottom(15));

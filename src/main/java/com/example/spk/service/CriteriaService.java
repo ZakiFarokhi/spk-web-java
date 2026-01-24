@@ -158,7 +158,7 @@ public class CriteriaService {
         pdf.addEventHandler(PdfDocumentEvent.START_PAGE, new KopSuratEventHandler(logoPath));
 
         Document document = new Document(pdf, PageSize.A4);
-        document.setMargins(135, 36, 40, 36);
+        document.setMargins(140, 36, 40, 36);
 
         // Judul
         document.add(new Paragraph("DAFTAR KRITERIA PENILAIAN")

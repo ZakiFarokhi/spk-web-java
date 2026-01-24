@@ -104,7 +104,7 @@ public class UserService {
 
         // 2. SET MARGIN DOKUMEN (Atas: 130 agar tidak menimpa Kop)
         Document document = new Document(pdf, PageSize.A4);
-        document.setMargins(135, 36, 40, 36);
+        document.setMargins(140, 36, 40, 36);
 
         // 3. JUDUL LAPORAN
         document.add(new Paragraph("DAFTAR PENGGUNA SISTEM (USERS)")

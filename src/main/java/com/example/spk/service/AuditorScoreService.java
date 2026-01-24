@@ -411,7 +411,7 @@ public class AuditorScoreService {
         // Gunakan Landscape jika sub-kriteria lebih dari 3 agar tidak sesak
         PageSize pageSize = subCriteriaList.size() > 3 ? PageSize.A4.rotate() : PageSize.A4;
         Document document = new Document(pdf, pageSize);
-        document.setMargins(135, 36, 40, 36);
+        document.setMargins(140, 36, 40, 36);
 
         document.add(new Paragraph("LAPORAN KONVERSI NILAI AUDITOR")
                 .setBold().setFontSize(12).setTextAlignment(TextAlignment.CENTER).setMarginBottom(5));

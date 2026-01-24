@@ -155,7 +155,7 @@ public class AuditorService {
         // Margin atas harus cukup besar (misal 130) agar isi tabel tidak menabrak Kop
         Document document = new Document(pdf, PageSize.A4);
         // Di AuditorService / UserService
-        document.setMargins(130, 36, 36, 36);
+        document.setMargins(140, 36, 36, 36);
 
         // Isi Laporan
         document.add(new Paragraph("DAFTAR PEGAWAI / AUDITOR")

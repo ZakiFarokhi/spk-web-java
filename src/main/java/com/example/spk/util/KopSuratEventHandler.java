@@ -30,6 +30,7 @@ public class KopSuratEventHandler implements IEventHandler {
         PdfDocument pdfDoc = docEvent.getDocument();
         PdfPage page = docEvent.getPage();
         Rectangle pageSize = page.getPageSize();
+        int pageNumber = pdfDoc.getPageNumber(page);
 
         // Hitung lebar area kerja (Lebar kertas - margin kiri & kanan)
         float areaWidth = pageSize.getWidth() - 72; // 36 kiri + 36 kanan
@@ -63,18 +64,22 @@ public class KopSuratEventHandler implements IEventHandler {
                 .add(new Paragraph("JAKARTA")
                         .setFontSize(10).setTextAlignment(TextAlignment.CENTER).setMarginTop(0).setMarginBottom(0))
                 .add(new Paragraph("Kode Pos: 10110")
-                        .setFontSize(9).setTextAlignment(TextAlignment.RIGHT).setMarginTop(2))
-                .setBorder(Border.NO_BORDER);
-
+                        .setFontSize(9).setTextAlignment(TextAlignment.RIGHT).setMarginTop(2)).setBorder(Border.NO_BORDER);
         mainTable.addCell(textCell);
 
         // 2. Garis Bawah Adaptif
         mainTable.setBorderBottom(new SolidBorder(com.itextpdf.kernel.colors.ColorConstants.BLACK, 2f));
 
         // 3. Posisi Tetap di Atas (Menggunakan areaWidth agar selalu center)
+        float kopBottomY = pageSize.getTop() - 120;
+        mainTable.setFixedPosition(36, kopBottomY, areaWidth);
         mainTable.setFixedPosition(36, pageSize.getTop() - 120, areaWidth);
 
         canvas.add(mainTable);
+        canvas.showTextAligned(new Paragraph("Halaman " + pageNumber).setFontSize(8),
+                pageSize.getRight() - 36,
+                kopBottomY - 15,
+                TextAlignment.RIGHT);
         canvas.close();
     }
 }
