@@ -453,7 +453,7 @@ public class AuditorScoreService {
 
         // Footer Tanda Tangan
         document.add(new Paragraph("\n"));
-        String tgl = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("id", "ID")));
+        String tgl = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", new Locale("id", "ID")));
         Table footer = new Table(1).setWidth(250f).setHorizontalAlignment(HorizontalAlignment.RIGHT);
         footer.addCell(new Cell().add(new Paragraph("Jakarta, " + tgl).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
         footer.addCell(new Cell().add(new Paragraph("Inspektur Provinsi DKI Jakarta").setBold().setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));

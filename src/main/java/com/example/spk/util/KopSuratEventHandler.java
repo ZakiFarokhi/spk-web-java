@@ -1,9 +1,12 @@
 package com.example.spk.util;
 
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
@@ -16,6 +19,8 @@ import com.itextpdf.layout.properties.VerticalAlignment;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.kernel.colors.ColorConstants;
+
+import java.io.IOException;
 
 public class KopSuratEventHandler implements IEventHandler {
     private String logoPath;
@@ -31,6 +36,13 @@ public class KopSuratEventHandler implements IEventHandler {
         PdfPage page = docEvent.getPage();
         Rectangle pageSize = page.getPageSize();
         int pageNumber = pdfDoc.getPageNumber(page);
+        PdfFont times;
+
+        try {
+            times = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // Hitung lebar area kerja (Lebar kertas - margin kiri & kanan)
         float areaWidth = pageSize.getWidth() - 72; // 36 kiri + 36 kanan
@@ -76,7 +88,7 @@ public class KopSuratEventHandler implements IEventHandler {
         mainTable.setFixedPosition(36, pageSize.getTop() - 120, areaWidth);
 
         canvas.add(mainTable);
-        canvas.showTextAligned(new Paragraph("Halaman " + pageNumber).setFontSize(8),
+        canvas.showTextAligned(new Paragraph("Halaman " + pageNumber).setFontSize(8).setFont(times),
                 pageSize.getRight() - 36,
                 kopBottomY - 15,
                 TextAlignment.RIGHT);

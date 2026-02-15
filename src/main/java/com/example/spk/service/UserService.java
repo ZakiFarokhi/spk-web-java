@@ -4,9 +4,7 @@ import com.example.spk.dto.UserDto;
 import com.example.spk.entity.User;
 import com.example.spk.repository.UserRepository;
 import com.example.spk.util.KopSuratEventHandler;
-import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
-import com.itextpdf.layout.element.Image;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -131,7 +129,7 @@ public class UserService {
 
         // 5. FOOTER TANDA TANGAN (Halaman Terakhir)
         document.add(new Paragraph("\n"));
-        String tanggalStr = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("id", "ID")));
+        String tanggalStr = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", new Locale("id", "ID")));
 
         Table footerTable = new Table(1).setWidth(250f).setHorizontalAlignment(HorizontalAlignment.RIGHT);
 

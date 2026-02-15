@@ -178,7 +178,9 @@ public class AuditorService {
 
         // Footer Tanda Tanggan (Tetap di akhir dokumen saja)
         document.add(new Paragraph("\n"));
-        String tanggalStr = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("id", "ID")));
+        String tanggalStr = LocalDate.now().format(
+                DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", new Locale("id", "ID"))
+        );
 
         Table footerTable = new Table(1).setWidth(250f).setHorizontalAlignment(HorizontalAlignment.RIGHT);
         footerTable.addCell(new Cell().add(new Paragraph("Jakarta, " + tanggalStr).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
